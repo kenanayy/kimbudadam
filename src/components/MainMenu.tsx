@@ -22,6 +22,8 @@ import {
   Globe,
   Skull,
   Users,
+  Swords,
+  Crown,
 } from "lucide-react";
 import { FootballPitchBackground } from "@/components/FootballPitchBackground";
 import { GameLogo } from "@/components/GameLogo";
@@ -39,6 +41,7 @@ interface MainMenuProps {
 const DIFFICULTY_META: Record<
   Difficulty,
   {
+    tier: string;
     icon: React.ComponentType<{ className?: string }>;
     selectedBorder: string;
     selectedBg: string;
@@ -51,12 +54,14 @@ const DIFFICULTY_META: Record<
     iconAnimation: string;
     accentColor: string;
     labelColor: string;
+    perk: string;
   }
 > = {
   KOLAY: {
+    tier: "BRONZ / ÇAYLAK",
     icon: Shield,
-    selectedBorder: "border-emerald-600 ring-2 ring-emerald-500/25",
-    selectedBg: "bg-emerald-50/90",
+    selectedBorder: "border-emerald-500 ring-2 ring-emerald-500/25",
+    selectedBg: "bg-emerald-50/95",
     hoverBorder: "hover:border-emerald-500",
     hoverShadow: "hover:shadow-lg hover:shadow-emerald-500/20",
     hoverGlow: "from-emerald-500/15 via-emerald-400/5 to-transparent",
@@ -66,11 +71,13 @@ const DIFFICULTY_META: Record<
     iconAnimation: "group-hover:scale-125 group-hover:rotate-12",
     accentColor: "bg-emerald-600",
     labelColor: "text-emerald-950",
+    perk: "1x Puan • İpuçları Açık",
   },
   ORTA: {
+    tier: "GÜMÜŞ / STANDART",
     icon: Zap,
-    selectedBorder: "border-amber-600 ring-2 ring-amber-500/25",
-    selectedBg: "bg-amber-50/90",
+    selectedBorder: "border-amber-500 ring-2 ring-amber-500/25",
+    selectedBg: "bg-amber-50/95",
     hoverBorder: "hover:border-amber-500",
     hoverShadow: "hover:shadow-lg hover:shadow-amber-500/20",
     hoverGlow: "from-amber-500/15 via-amber-400/5 to-transparent",
@@ -80,11 +87,13 @@ const DIFFICULTY_META: Record<
     iconAnimation: "group-hover:scale-125 group-hover:-rotate-12",
     accentColor: "bg-amber-600",
     labelColor: "text-amber-950",
+    perk: "2x Puan • Dengeli Mod",
   },
   ZOR: {
+    tier: "ALTIN / USTA",
     icon: Flame,
-    selectedBorder: "border-rose-600 ring-2 ring-rose-500/25",
-    selectedBg: "bg-rose-50/90",
+    selectedBorder: "border-rose-500 ring-2 ring-rose-500/25",
+    selectedBg: "bg-rose-50/95",
     hoverBorder: "hover:border-rose-500",
     hoverShadow: "hover:shadow-lg hover:shadow-rose-500/25",
     hoverGlow: "from-rose-500/15 via-rose-400/5 to-transparent",
@@ -94,69 +103,100 @@ const DIFFICULTY_META: Record<
     iconAnimation: "group-hover:scale-130 group-hover:rotate-6 group-hover:animate-pulse",
     accentColor: "bg-rose-600",
     labelColor: "text-rose-950",
+    perk: "3x Puan • 🔒 Lig Gizli",
   },
   EFSANE: {
-    icon: Skull,
-    selectedBorder: "border-purple-600 ring-2 ring-purple-500/25",
-    selectedBg: "bg-purple-50/90",
+    tier: "👑 ELİT GURME",
+    icon: Crown,
+    selectedBorder: "border-purple-400 ring-2 ring-purple-400/30",
+    selectedBg: "bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950 text-white shadow-xl shadow-purple-950/30",
     hoverBorder: "hover:border-purple-500",
     hoverShadow: "hover:shadow-lg hover:shadow-purple-500/25",
-    hoverGlow: "from-purple-500/15 via-purple-400/5 to-transparent",
-    badgeSelected: "bg-purple-200/90 text-purple-950 font-bold border-purple-300",
+    hoverGlow: "from-purple-500/20 via-purple-400/5 to-transparent",
+    badgeSelected: "bg-purple-400/20 text-purple-200 font-bold border-purple-400/40",
     badgeHover: "group-hover:bg-purple-100 group-hover:text-purple-900 group-hover:border-purple-300",
-    iconColor: "text-purple-600",
+    iconColor: "text-amber-400",
     iconAnimation: "group-hover:scale-130 group-hover:rotate-12",
-    accentColor: "bg-purple-600",
-    labelColor: "text-purple-950",
+    accentColor: "bg-purple-500",
+    labelColor: "text-purple-200",
+    perk: "5x Puan • ⚡ Sıfır İpucu",
   },
 };
 
 const CATEGORY_META: Record<
   Category,
   {
+    tag: string;
+    stars: string;
+    subtitle: string;
     icon: React.ComponentType<{ className?: string }>;
+    selectedBorder: string;
+    selectedBg: string;
+    selectedGlow: string;
     hoverBorder: string;
     hoverShadow: string;
     hoverGlow: string;
     iconBgSelected: string;
     iconBgUnselected: string;
     iconAnimation: string;
-    activeDot: string;
-    activeBadge: string;
+    badgeSelected: string;
+    badgeUnselected: string;
+    accentGlow: string;
   }
 > = {
   ALL: {
+    tag: "GLOBAL YILDIZLAR",
+    stars: "⭐⭐⭐",
+    subtitle: "Dünya Çapında Efsaneler",
     icon: Sparkles,
+    selectedBorder: "border-emerald-400 ring-2 ring-emerald-400/30",
+    selectedBg: "bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950 text-white shadow-xl shadow-emerald-950/25",
+    selectedGlow: "from-emerald-500/20 via-emerald-400/5 to-transparent",
     hoverBorder: "hover:border-emerald-400",
-    hoverShadow: "hover:shadow-md hover:shadow-emerald-500/15",
+    hoverShadow: "hover:shadow-lg hover:shadow-emerald-500/15",
     hoverGlow: "from-emerald-500/10 via-emerald-400/5 to-transparent",
-    iconBgSelected: "bg-emerald-500/20 text-emerald-300",
+    iconBgSelected: "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/30",
     iconBgUnselected: "bg-white text-emerald-600 shadow-2xs group-hover:bg-emerald-50",
     iconAnimation: "group-hover:scale-125 group-hover:rotate-12",
-    activeDot: "bg-emerald-400",
-    activeBadge: "text-emerald-400",
+    badgeSelected: "bg-emerald-400/20 text-emerald-300 border-emerald-400/40",
+    badgeUnselected: "bg-slate-100 text-slate-600 border-slate-200/90",
+    accentGlow: "bg-emerald-400",
   },
   SUPER_LIG: {
+    tag: "TÜRKİYE LİGİ",
+    stars: "⭐⭐",
+    subtitle: "Süper Lig Yıldızları",
     icon: Trophy,
-    hoverBorder: "hover:border-amber-400",
-    hoverShadow: "hover:shadow-md hover:shadow-amber-500/15",
-    hoverGlow: "from-amber-500/10 via-amber-400/5 to-transparent",
-    iconBgSelected: "bg-amber-500/20 text-amber-300",
-    iconBgUnselected: "bg-white text-amber-600 shadow-2xs group-hover:bg-amber-50",
+    selectedBorder: "border-rose-400 ring-2 ring-rose-400/30",
+    selectedBg: "bg-gradient-to-b from-slate-950 via-slate-900 to-rose-950 text-white shadow-xl shadow-rose-950/25",
+    selectedGlow: "from-rose-500/20 via-rose-400/5 to-transparent",
+    hoverBorder: "hover:border-rose-400",
+    hoverShadow: "hover:shadow-lg hover:shadow-rose-500/15",
+    hoverGlow: "from-rose-500/10 via-rose-400/5 to-transparent",
+    iconBgSelected: "bg-rose-500/20 text-rose-300 ring-1 ring-rose-400/30",
+    iconBgUnselected: "bg-white text-rose-600 shadow-2xs group-hover:bg-rose-50",
     iconAnimation: "group-hover:scale-125 group-hover:-rotate-12",
-    activeDot: "bg-amber-400",
-    activeBadge: "text-amber-300",
+    badgeSelected: "bg-rose-400/20 text-rose-300 border-rose-400/40",
+    badgeUnselected: "bg-slate-100 text-slate-600 border-slate-200/90",
+    accentGlow: "bg-rose-400",
   },
   WORLD: {
+    tag: "5 BÜYÜK LİG",
+    stars: "⭐⭐⭐",
+    subtitle: "Avrupa Devleri & Dünya",
     icon: Globe,
+    selectedBorder: "border-sky-400 ring-2 ring-sky-400/30",
+    selectedBg: "bg-gradient-to-b from-slate-950 via-slate-900 to-sky-950 text-white shadow-xl shadow-sky-950/25",
+    selectedGlow: "from-sky-500/20 via-sky-400/5 to-transparent",
     hoverBorder: "hover:border-sky-400",
-    hoverShadow: "hover:shadow-md hover:shadow-sky-500/15",
+    hoverShadow: "hover:shadow-lg hover:shadow-sky-500/15",
     hoverGlow: "from-sky-500/10 via-sky-400/5 to-transparent",
-    iconBgSelected: "bg-sky-500/20 text-sky-300",
+    iconBgSelected: "bg-sky-500/20 text-sky-300 ring-1 ring-sky-400/30",
     iconBgUnselected: "bg-white text-sky-600 shadow-2xs group-hover:bg-sky-50",
     iconAnimation: "group-hover:scale-125 group-hover:rotate-45",
-    activeDot: "bg-sky-400",
-    activeBadge: "text-sky-300",
+    badgeSelected: "bg-sky-400/20 text-sky-300 border-sky-400/40",
+    badgeUnselected: "bg-slate-100 text-slate-600 border-slate-200/90",
+    accentGlow: "bg-sky-400",
   },
 };
 
@@ -312,29 +352,29 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           </div>
         </div>
 
-        {/* 2. Kategori / Lig Havuzu Seçimi */}
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-sm space-y-2">
+        {/* 2. Kategori / Lig Havuzu Seçimi (Futbol Kart Paketleri) */}
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between text-xs px-1">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700">
                 <Compass className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                Lig & Havuz Filtresi
+                Lig & Kart Paketi Filtresi
               </span>
             </div>
-            <span className="text-[11px] font-mono text-slate-600 font-semibold bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/80">
+            <span className="text-[11px] font-mono text-slate-600 font-bold bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/80">
               {counts[selectedCategory]} oyuncu hazır
             </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {(
               [
-                { id: "ALL", label: "Tüm Oyuncular", desc: `${counts.ALL} Yıldız` },
-                { id: "SUPER_LIG", label: "Süper Lig", desc: `${counts.SUPER_LIG} Oyuncu` },
-                { id: "WORLD", label: "Dünya & Avrupa", desc: `${counts.WORLD} Dev` },
-              ] as { id: Category; label: string; desc: string }[]
+                { id: "ALL", label: "Tüm Oyuncular", count: counts.ALL, unit: "Yıldız" },
+                { id: "SUPER_LIG", label: "Süper Lig", count: counts.SUPER_LIG, unit: "Oyuncu" },
+                { id: "WORLD", label: "Dünya & Avrupa", count: counts.WORLD, unit: "Dev" },
+              ] as { id: Category; label: string; count: number; unit: string }[]
             ).map((cat) => {
               const meta = CATEGORY_META[cat.id];
               const Icon = meta.icon;
@@ -348,9 +388,9 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     soundManager.playClick();
                     setSelectedCategory(cat.id);
                   }}
-                  className={`p-2.5 sm:p-3 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.03] active:translate-y-0 active:scale-[0.98] ${
+                  className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[110px] ${
                     isSelected
-                      ? "bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-950/20"
+                      ? `${meta.selectedBg} ${meta.selectedBorder}`
                       : `bg-slate-50/90 hover:bg-white border-slate-200/90 text-slate-800 ${meta.hoverBorder} ${meta.hoverShadow}`
                   }`}
                 >
@@ -359,58 +399,81 @@ export const MainMenu: React.FC<MainMenuProps> = ({
 
                   {/* Arka Plan Renkli Hover Işıması */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br ${meta.hoverGlow} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
+                    className={`absolute inset-0 bg-gradient-to-br ${
+                      isSelected ? meta.selectedGlow : meta.hoverGlow
+                    } opacity-100 transition-opacity duration-300 pointer-events-none`}
                   />
 
-                  {/* Üst Satır: İkon + İsim + Seçili Nabız Noktası */}
-                  <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {/* Animasyonlu İkon Rozeti */}
-                      <div
-                        className={`w-5 h-5 rounded-md shrink-0 flex items-center justify-center transition-all duration-300 ${
-                          isSelected ? meta.iconBgSelected : meta.iconBgUnselected
-                        }`}
-                      >
-                        <div
-                          className={`transition-transform duration-300 ${meta.iconAnimation}`}
-                        >
-                          <Icon className="w-3 h-3" />
-                        </div>
-                      </div>
+                  {/* Üst Kısım: Tag + Nadirlik Yıldızları + Onay */}
+                  <div className="flex items-center justify-between relative z-10 w-full">
+                    <span
+                      className={`text-[9px] font-mono font-black tracking-wider uppercase px-2 py-0.5 rounded-md border ${
+                        isSelected
+                          ? "bg-white/10 text-white border-white/20"
+                          : "bg-white text-slate-500 border-slate-200"
+                      }`}
+                    >
+                      {meta.tag}
+                    </span>
 
-                      <span
-                        className={`text-xs font-bold leading-tight truncate transition-colors duration-200 ${
-                          isSelected
-                            ? "text-white"
-                            : "text-slate-900 group-hover:text-black"
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] tracking-tighter">
+                        {meta.stars}
+                      </span>
+                      {isSelected && (
+                        <div className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] shadow-xs">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Orta Kısım: İkon + İsim */}
+                  <div className="flex items-center gap-2.5 my-2 relative z-10">
+                    <div
+                      className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center transition-all duration-300 shadow-sm ${
+                        isSelected ? meta.iconBgSelected : meta.iconBgUnselected
+                      }`}
+                    >
+                      <div className={`transition-transform duration-300 ${meta.iconAnimation}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3
+                        className={`text-sm sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
+                          isSelected ? "text-white" : "text-slate-900 group-hover:text-black"
                         }`}
                       >
                         {cat.label}
-                      </span>
+                      </h3>
+                      <p
+                        className={`text-[10px] font-medium truncate mt-1 ${
+                          isSelected ? "text-white/70" : "text-slate-500"
+                        }`}
+                      >
+                        {meta.subtitle}
+                      </p>
                     </div>
-
-                    {/* Seçili Nabız İndikatörü */}
-                    {isSelected && (
-                      <span className="relative flex h-2 w-2 shrink-0">
-                        <span
-                          className={`animate-ping absolute inline-flex h-full w-full rounded-full ${meta.activeDot} opacity-75`}
-                        />
-                        <span
-                          className={`relative inline-flex rounded-full h-2 w-2 ${meta.activeDot}`}
-                        />
-                      </span>
-                    )}
                   </div>
 
-                  {/* Alt Satır: Oyuncu Sayısı Rozeti */}
-                  <div
-                    className={`text-[10px] font-mono mt-1.5 relative z-10 transition-colors duration-200 ${
-                      isSelected
-                        ? meta.activeBadge
-                        : "text-slate-500 group-hover:text-slate-700 font-medium"
-                    }`}
-                  >
-                    {cat.desc}
+                  {/* Alt Kısım: Rozet */}
+                  <div className="relative z-10 pt-1 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+                    <span
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border transition-all ${
+                        isSelected ? meta.badgeSelected : meta.badgeUnselected
+                      }`}
+                    >
+                      {cat.count} {cat.unit}
+                    </span>
+                    <span
+                      className={`text-[10px] font-mono ${
+                        isSelected ? "text-white/60" : "text-slate-400"
+                      }`}
+                    >
+                      {isSelected ? "Aktif Paket" : "Paketi Seç ➔"}
+                    </span>
                   </div>
                 </button>
               );
@@ -418,18 +481,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           </div>
         </div>
 
-        {/* 3. Zorluk Seviyesi (Animasyonlu Kartlar) */}
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-sm space-y-2">
+        {/* 3. Zorluk Seviyesi (Koleksiyon Kart Kademeleri) */}
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between text-xs px-1">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700">
                 <Zap className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                Zorluk Seviyesi
+                Zorluk & Kart Kademesi
               </span>
             </div>
-            <span className="text-[11px] font-mono text-slate-600 font-semibold bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/80">
+            <span className="text-[11px] font-mono text-slate-600 font-bold bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/80">
               {selectedDifficulty === "KOLAY"
                 ? "1x Skor"
                 : selectedDifficulty === "ORTA"
@@ -440,12 +503,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
             {(["KOLAY", "ORTA", "ZOR", "EFSANE"] as Difficulty[]).map((level) => {
               const cfg = DIFFICULTY_CONFIGS[level];
               const meta = DIFFICULTY_META[level];
               const Icon = meta.icon;
               const isSelected = selectedDifficulty === level;
+              const isEfsane = level === "EFSANE";
 
               return (
                 <button
@@ -455,14 +519,14 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     soundManager.playClick();
                     setSelectedDifficulty(level);
                   }}
-                  className={`p-2.5 sm:p-3 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.03] active:translate-y-0 active:scale-[0.98] ${
+                  className={`p-3 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[135px] ${
                     isSelected
-                      ? `${meta.selectedBg} ${meta.selectedBorder} shadow-sm`
+                      ? `${meta.selectedBg} ${meta.selectedBorder} shadow-md`
                       : `bg-slate-50/90 hover:bg-white border-slate-200/90 ${meta.hoverBorder} ${meta.hoverShadow}`
                   }`}
                 >
-                  {/* Hover Anında Holografik Işık / Parıltı Süpürme Efekti */}
-                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
+                  {/* Holografik Işık / Parıltı Süpürme Efekti */}
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
 
                   {/* Arka Plan Renkli Hover Işıması */}
                   <div
@@ -478,27 +542,43 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     </div>
                   )}
 
-                  {/* Başlık Satırı & Hareketli İkon (İkon başlığın solunda, köşedeki tik ile asla çakışmaz) */}
-                  <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {/* Animasyonlu İkon Rozeti */}
-                      <div
-                        className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center transition-all duration-300 ${
-                          isSelected
-                            ? "bg-white/90 shadow-2xs"
-                            : "bg-white/80 group-hover:bg-white shadow-2xs"
-                        } ${meta.iconColor}`}
-                      >
-                        <div
-                          className={`transition-transform duration-300 ${meta.iconAnimation}`}
-                        >
-                          <Icon className="w-3.5 h-3.5" />
-                        </div>
-                      </div>
+                  {/* Üst Kısım: Tier Adı */}
+                  <div className="relative z-10 flex items-center justify-between w-full">
+                    <span
+                      className={`text-[9px] font-mono font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                        isSelected && isEfsane
+                          ? "bg-purple-900/80 text-purple-200 border-purple-400/40"
+                          : isSelected
+                          ? "bg-white/80 text-slate-800 border-slate-200"
+                          : "bg-white text-slate-500 border-slate-200"
+                      }`}
+                    >
+                      {meta.tier}
+                    </span>
+                  </div>
 
+                  {/* Orta Kısım: İkon & Kademe Başlığı */}
+                  <div className="flex items-center gap-2 my-2 relative z-10">
+                    <div
+                      className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-all duration-300 shadow-2xs ${
+                        isSelected && isEfsane
+                          ? "bg-purple-800/80 text-amber-300"
+                          : isSelected
+                          ? "bg-white/95"
+                          : "bg-white text-slate-700 group-hover:bg-white"
+                      } ${meta.iconColor}`}
+                    >
+                      <div className={`transition-transform duration-300 ${meta.iconAnimation}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                    </div>
+
+                    <div className="min-w-0">
                       <div
-                        className={`text-xs sm:text-sm font-black tracking-tight truncate transition-colors duration-200 ${
-                          isSelected
+                        className={`text-sm sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
+                          isSelected && isEfsane
+                            ? "text-white"
+                            : isSelected
                             ? meta.labelColor
                             : "text-slate-900 group-hover:text-black"
                         }`}
@@ -508,20 +588,24 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     </div>
                   </div>
 
-                  {/* Tahmin & Joker Rozetleri */}
-                  <div className="relative z-10 mt-1.5 flex items-center gap-1 flex-wrap">
-                    <div
-                      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all duration-200 border ${
-                        isSelected
+                  {/* İstatistikler: Hak & Joker */}
+                  <div className="relative z-10 flex items-center gap-1 flex-wrap">
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                        isSelected && isEfsane
+                          ? "bg-purple-900/60 text-purple-200 border-purple-400/30"
+                          : isSelected
                           ? meta.badgeSelected
-                          : `bg-white text-slate-600 border-slate-200 ${meta.badgeHover}`
+                          : `bg-white text-slate-700 border-slate-200 ${meta.badgeHover}`
                       }`}
                     >
                       {cfg.maxAttempts} Hak
-                    </div>
-                    <div
-                      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all duration-200 border ${
-                        isSelected
+                    </span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                        isSelected && isEfsane
+                          ? "bg-purple-950 text-amber-300 border-amber-400/30"
+                          : isSelected
                           ? "bg-amber-100 text-amber-950 border-amber-300"
                           : "bg-slate-100 text-slate-600 border-slate-200"
                       }`}
@@ -533,24 +617,20 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                         : level === "ZOR"
                         ? "1 Joker"
                         : "0 Joker"}
-                    </div>
+                    </span>
                   </div>
 
-                  {/* Skor Çarpanı & Ek Açıklama */}
-                  <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-1 flex items-center justify-between">
-                    <span className="font-semibold group-hover:text-slate-800 transition-colors">
-                      {cfg.scoreMultiplier}x Çarpan
-                    </span>
-                    {level === "ZOR" && (
-                      <span className="text-[9px] text-rose-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                        Lig Gizli!
-                      </span>
-                    )}
-                    {level === "EFSANE" && (
-                      <span className="text-[9px] text-purple-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                        Sıfır İpucu!
-                      </span>
-                    )}
+                  {/* Alt Kısım: Çarpan & Özellik */}
+                  <div
+                    className={`relative z-10 text-[10px] font-mono mt-2 pt-1 border-t truncate ${
+                      isSelected && isEfsane
+                        ? "border-purple-800 text-amber-300 font-bold"
+                        : isSelected
+                        ? "border-slate-200/60 text-slate-700 font-bold"
+                        : "border-slate-100 text-slate-500 font-medium"
+                    }`}
+                  >
+                    {meta.perk}
                   </div>
                 </button>
               );
@@ -559,7 +639,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         </div>
 
         {/* 4. Oyuna Başla & Canlı 1v1 Maç Butonları */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
+          {/* TEK KİŞİLİK OYNA BUTONU (Zümrüt Yeşil Stadyum) */}
           <button
             type="button"
             onClick={() => onStartGame(selectedDifficulty, selectedCategory)}
@@ -581,21 +662,32 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-200 stroke-[2.5]" />
           </button>
 
-          {/* ⚡ CANLI 1v1 DERBİ BUTONU */}
+          {/* 🌙 GECE DERBİSİ: CANLI 1v1 BUTONU (OBSİDYEN SİYAH & PARLAK ALTIN) */}
           <button
             type="button"
             onClick={() => {
               soundManager.playClick();
               onOpenMultiplayer();
             }}
-            className="group relative overflow-hidden w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:via-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-lg shadow-indigo-700/25 hover:shadow-xl hover:shadow-indigo-600/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer border border-indigo-400/30"
+            className="group relative overflow-hidden w-full py-3.5 sm:py-4 px-6 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 hover:from-black hover:via-slate-900 hover:to-black text-white font-extrabold text-sm sm:text-base rounded-2xl border-2 border-amber-400/90 hover:border-amber-300 shadow-xl shadow-amber-500/10 hover:shadow-2xl hover:shadow-amber-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users className="w-4 h-4 text-white" />
+            {/* Holografik Altın Işık Süpürme Efekti */}
+            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-amber-300/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
+
+            {/* Kılıçlar İkon Rozeti */}
+            <div className="w-8 h-8 rounded-xl bg-amber-400/15 border border-amber-400/40 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm shrink-0">
+              <Swords className="w-4 h-4 text-amber-400" />
             </div>
-            <span className="tracking-wide uppercase font-black">
-              ⚡ CANLI 1v1 DERBİ (ARKADAŞINLA OYNA)
-            </span>
+
+            {/* Metin & Alt Açıklama */}
+            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5">
+              <span className="tracking-wide uppercase font-black text-amber-300 group-hover:text-amber-200 transition-colors">
+                CANLI 1v1 DERBİ
+              </span>
+              <span className="text-[11px] font-mono font-bold text-amber-300/90 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-400/40">
+                (ARKADAŞINA MEYDAN OKU ⚔️)
+              </span>
+            </div>
           </button>
         </div>
 
