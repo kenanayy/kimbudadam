@@ -1,0 +1,216 @@
+import { Player } from "@/types/player";
+
+/**
+ * 👕 DÜNYA VE TÜRKİYE FUTBOLUNUN İKONİK FORMA NUMARALARI
+ */
+export const ICONIC_JERSEY_NUMBERS: Record<string, number> = {
+  // --- SÜPERSTARLAR & DÜNYA DEVLERİ ---
+  "cristiano-ronaldo": 7,
+  "lionel-messi": 10,
+  "erling-haaland": 9,
+  "kylian-mbappe": 9,
+  "vinicius-junior": 7,
+  "jude-bellingham": 5,
+  "rodri-hernandez": 16,
+  "lamine-yamal": 19,
+  "kevin-de-bruyne": 17,
+  "mohamed-salah": 11,
+  "harry-kane": 9,
+  "robert-lewandowski": 9,
+  "karim-benzema": 9,
+  "luka-modric": 10,
+  "toni-kroos": 8,
+  "neymar-jr": 10,
+  "antoine-griezmann": 7,
+  "bukayo-saka": 7,
+  "phil-foden": 47,
+  "cole-palmer": 20,
+  "florian-wirtz": 10,
+  "jamal-musiala": 42,
+  "pedri-gonzalez": 8,
+  "gavi": 6,
+  "federico-valverde": 8,
+  "eduardo-camavinga": 6,
+  "aurelien-tchouameni": 14,
+  "antonio-rudiger": 22,
+  "virgil-van-dijk": 4,
+  "ruben-dias": 3,
+  "alisson-becker": 1,
+  "ederson-moraes": 31,
+  "thibaut-courtois": 1,
+  "manuel-neuer": 1,
+  "emiliano-martinez": 23,
+  "jan-oblak": 13,
+  "marc-andre-ter-stegen": 1,
+  "gianluigi-donnarumma": 99,
+  "heung-min-son": 7,
+  "bernardo-silva": 20,
+  "bruno-fernandes": 8,
+  "lautaro-martinez": 10,
+  "nicolas-otamendi": 30,
+  "julian-alvarez": 19,
+  "alexis-mac-allister": 10,
+  "enzo-fernandez": 8,
+  "declan-rice": 41,
+  "william-saliba": 2,
+  "gabriel-magalhaes": 6,
+  "martin-odegaard": 8,
+  "kai-havertz": 29,
+  "marquinhos": 5,
+  "achraf-hakimi": 2,
+  "theo-hernandez": 19,
+  "mike-maignan": 16,
+  "rafael-leao": 10,
+  "khvicha-kvaratskhelia": 77,
+  "victor-osimhen": 45,
+
+  // --- TÜRK MİLLİ TAKIMI & SÜPER LİG YILDIZLARI ---
+  "arda-guler": 15,
+  "kenan-yildiz": 10,
+  "hakan-calhanoglu": 20,
+  "ferdi-kadioglu": 24,
+  "baris-alper-yilmaz": 53,
+  "kerem-akturkoglu": 7,
+  "yunus-akgun": 11,
+  "semih-kilicsoy": 9,
+  "mauro-icardi": 9,
+  "edin-dzeko": 9,
+  "dusan-tadic": 10,
+  "dries-mertens": 10,
+  "lucas-torreira": 34,
+  "fred": 35,
+  "sebastian-szymanski": 53,
+  "dominik-livakovic": 40,
+  "fernando-muslera": 1,
+  "gedson-fernandes": 83,
+  "rafa-silva": 27,
+  "ciro-immobile": 17,
+  "allan-saint-maximin": 97,
+  "youssef-en-nesyri": 19,
+  "sofyan-amrabat": 34,
+  "alexander-djiku": 23,
+  "jayden-oosterwolde": 22,
+  "mert-muldur": 3,
+  "irfan-can-kahveci": 17,
+  "ismail-yuksek": 5,
+  "cenk-tosun": 23,
+  "abdulkerim-bardakci": 42,
+  "davinson-sanchez": 6,
+  "victor-nelsson": 25,
+  "kaan-ayhan": 23,
+  "al-musrati": 28,
+  "arthur-masuaku": 26,
+  "mert-gunok": 34,
+  "ugurcan-cakir": 1,
+  "altay-bayindir": 1,
+  "ahmetcan-kaplan": 4,
+  "orhun-kokcu": 10,
+  "salih-ozcan": 6,
+  "zeki-celik": 2,
+  "caglar-soyuncu": 4,
+  "ozan-kabak": 15,
+  "merih-demiral": 28,
+  "enes-unal": 9,
+  "yusuf-yazici": 11,
+  "okay-yokuslu": 5,
+
+  // --- EFSANELER (LEGENDS) ---
+  "alex-de-souza": 10,
+  "gheorghe-hagi": 10,
+  "wesley-sneijder": 10,
+  "didier-drogba": 11,
+  "robin-van-persie": 20,
+  "mesut-ozil": 10,
+  "volkan-demirel": 1,
+  "rustu-recber": 1,
+  "burak-yilmaz": 17,
+  "selcuk-inan": 8,
+  "emre-belozoglu": 5,
+  "tuncay-sanli": 10,
+  "nihat-kahveci": 8,
+  "ardaturk": 10,
+  "arda-turan": 10,
+  "sabri-sarioglu": 55,
+  "felipe-melo": 10,
+  "ricardo-quaresma": 7,
+  "mario-gomez": 33,
+  "anderson-talisca": 94,
+  "vincente-aboubakar": 10,
+  "diego-lugano": 2,
+  "stephen-appiah": 4,
+  "deivid-de-souza": 99,
+  "mateja-kezman": 9,
+  "moussa-sow": 7,
+  "dirk-kuyt": 11,
+  "pierre-van-hooijdonk": 17,
+  "zinedine-zidane": 5,
+  "ronaldinho": 10,
+  "ronaldo-nazario": 9,
+  "thierry-henry": 14,
+  "andrea-pirlo": 21,
+  "steven-gerrard": 8,
+  "frank-lampard": 8,
+  "paolo-maldini": 3,
+  "sergio-ramos": 4,
+  "carles-puyol": 5,
+  "luis-suarez": 9,
+  "gareth-bale": 11,
+  "sergio-aguero": 10,
+  "eden-hazard": 10,
+  "zlatan-ibrahimovic": 11,
+  "pepe": 3,
+  "gianluigi-buffon": 1,
+  "iker-casillas": 1,
+  "xavi-hernandez": 6,
+  "andres-iniesta": 8,
+  "kaka": 22,
+  "david-beckham": 7,
+  "wayne-rooney": 10,
+  "paul-scholes": 18,
+  "ryan-giggs": 11,
+  "alessandro-del-piero": 10,
+  "francesco-totti": 10,
+  "roberto-carlos": 3,
+  "cafu": 2,
+  "clarence-seedorf": 10,
+  "arjen-robben": 10,
+  "franck-ribery": 7,
+  "bastian-schweinsteiger": 31,
+  "philipp-lahm": 21,
+};
+
+/**
+ * Bir futbolcunun forma numarasını getirir.
+ * Veritabanında birebir kayıt yoksa mevki ve ID'sine göre deterministik gerçekçi bir numara üretir.
+ */
+export function getPlayerJerseyNumber(player: Player): number {
+  if (ICONIC_JERSEY_NUMBERS[player.id]) {
+    return ICONIC_JERSEY_NUMBERS[player.id];
+  }
+
+  // ID'ye dayalı deterministik hash (Her oyuncu her seferinde aynı gerçekçi numarayı alır)
+  let hash = 0;
+  for (let i = 0; i < player.id.length; i++) {
+    hash = (hash * 31 + player.id.charCodeAt(i)) >>> 0;
+  }
+
+  if (player.position === "Kaleci") {
+    const gkNumbers = [1, 12, 23, 25, 34, 99];
+    return gkNumbers[hash % gkNumbers.length];
+  }
+
+  if (player.position === "Defans") {
+    const defNumbers = [2, 3, 4, 5, 6, 12, 13, 14, 15, 20, 22, 23, 24, 25, 33];
+    return defNumbers[hash % defNumbers.length];
+  }
+
+  if (player.position === "Orta Saha") {
+    const midNumbers = [6, 8, 10, 14, 16, 17, 18, 20, 21, 22, 25, 34, 42, 88];
+    return midNumbers[hash % midNumbers.length];
+  }
+
+  // Forvet
+  const fwdNumbers = [7, 9, 10, 11, 17, 18, 19, 20, 21, 22, 29, 99];
+  return fwdNumbers[hash % fwdNumbers.length];
+}
+

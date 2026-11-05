@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <radialGradient id="squircleBg" cx="25%" cy="20%" r="90%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#10b981" />
+      <stop offset="35%" stopColor="#059669" />
+      <stop offset="75%" stopColor="#064e3b" />
+      <stop offset="100%" stopColor="#022c22" />
+    </radialGradient>
+    <linearGradient id="squircleBorder" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#a7f3d0" />
+      <stop offset="50%" stopColor="#ffffff" />
+      <stop offset="100%" stopColor="#047857" />
+    </linearGradient>
+    <linearGradient id="goldAdam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#ffffff" />
+      <stop offset="35%" stopColor="#fef08a" />
+      <stop offset="100%" stopColor="#f59e0b" />
+    </linearGradient>
+    <linearGradient id="neonQuestion" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#a7f3d0" />
+      <stop offset="100%" stopColor="#34d399" />
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="112" height="112" rx="28" fill="url(#squircleBg)" stroke="url(#squircleBorder)" stroke-width="3.5" />
+  <rect x="8" y="8" width="104" height="104" rx="24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.3" />
+
+  <text x="60" y="45" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-weight="900" font-size="18" letter-spacing="2">KİM BU</text>
+  
+  <text x="60" y="76" text-anchor="middle" font-family="sans-serif" font-weight="900">
+    <tspan fill="url(#goldAdam)" font-size="24" letter-spacing="1.2">ADAM</tspan>
+    <tspan fill="url(#neonQuestion)" font-size="28" dx="4">?</tspan>
+  </text>
+
+  <circle cx="60" cy="96" r="6" fill="#ffffff" stroke="#064e3b" stroke-width="1.5" />
+</svg>
