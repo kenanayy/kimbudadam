@@ -313,18 +313,18 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
 
           <div className="text-right">
             <span className="text-xs font-mono font-bold text-slate-400 block">
-              Açık Kulüp
+              Kariyer Rotası
             </span>
-            <span className="text-sm font-black font-mono text-emerald-700">
-              {room.revealedClubCount} / {targetPlayer.career.length}
+            <span className="text-xs sm:text-sm font-black font-mono text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-lg border border-emerald-300">
+              Tamamı Açık ({targetPlayer.career.length} Kulüp)
             </span>
           </div>
         </div>
 
-        {/* TRANSFER ROTASI */}
+        {/* TRANSFER ROTASI (1v1'DE TÜM KULÜPLER BAŞTAN AÇIK) */}
         <CareerTimeline
           career={targetPlayer.career}
-          revealedCount={room.revealedClubCount}
+          revealedCount={targetPlayer.career.length}
           isGameOver={room.status !== "PLAYING"}
           showLeague={true}
           embedded={true}
@@ -435,14 +435,14 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
               onGuess={handleGuess}
               onSkip={handleSkip}
               onGiveUp={() => {}}
-              canSkip={room.revealedClubCount < targetPlayer.career.length}
+              canSkip={false}
               isLastChance={false}
             />
 
-            {/* Pas ve Bilgi İpucu */}
+            {/* Bilgi İpucu */}
             <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 px-1">
-              <span>💡 İpucu: Biriniz pas geçerse sıradaki kulüp ikinize de açılır!</span>
-              <span className="font-bold text-emerald-700">En Hızlı Tahmin Kazanır</span>
+              <span>⚡ Tüm kulüpler baştan açık!</span>
+              <span className="font-bold text-emerald-700">En Hızlı Tahmin Eden Golü Atar</span>
             </div>
           </div>
         )}

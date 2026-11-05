@@ -343,7 +343,7 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
                     <span>5 Turluk Canlı Hızlı Maç</span>
                   </div>
                   <p className="text-[11px] text-emerald-800 leading-relaxed">
-                    Aynı futbolcular ikinize de aynı anda sorulur. En hızlı bilip en çok golü atan maçı ve kupayı kazanır!
+                    Futbolcunun tüm kariyer kulüpleri baştan sona tam açık gelir! En hızlı tahmin edip golleri atan maçı kazanır!
                   </p>
                 </div>
 
