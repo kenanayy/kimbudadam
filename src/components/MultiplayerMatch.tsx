@@ -29,6 +29,14 @@ interface MultiplayerMatchProps {
   onToggleSound: () => void;
 }
 
+interface FloatingReaction {
+  id: string;
+  emoji: string;
+  senderName: string;
+  isMe: boolean;
+  xPercent: number;
+}
+
 export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   initialRoom,
   myPlayerId,
@@ -42,6 +50,11 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   const [rematchRequested, setRematchRequested] = useState<boolean>(false);
   const [opponentGuessFlash, setOpponentGuessFlash] = useState<string | null>(null);
   const lastSeenOpponentGuessIdRef = React.useRef<string | null>(null);
+
+  // Canlı emoji reaksiyonları state ve ref'leri
+  const [floatingReactions, setFloatingReactions] = useState<FloatingReaction[]>([]);
+  const lastSeenReactionIdRef = React.useRef<string | null>(null);
+  const [reactionCooldown, setReactionCooldown] = useState<boolean>(false);
 
   const isHost = room.host.id === myPlayerId;
   const me = isHost ? room.host : room.guest;
@@ -93,6 +106,31 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
       }
     }
   }, [room.recentGuesses, myPlayerId]);
+
+  // Canlı emoji reaksiyonu geldiğinde ekranda uçur ve ses çal
+  useEffect(() => {
+    if (!room.latestReaction) return;
+    if (room.latestReaction.id === lastSeenReactionIdRef.current) return;
+    lastSeenReactionIdRef.current = room.latestReaction.id;
+
+    const isMe = room.latestReaction.senderId === myPlayerId;
+    const newReaction: FloatingReaction = {
+      id: room.latestReaction.id + "_" + Math.random().toString(36).substring(2, 6),
+      emoji: room.latestReaction.emoji,
+      senderName: room.latestReaction.senderName,
+      isMe,
+      xPercent: isMe ? 20 + Math.random() * 25 : 55 + Math.random() * 25,
+    };
+
+    soundManager.playReaction();
+    setFloatingReactions((prev) => [...prev.slice(-8), newReaction]);
+
+    const timer = setTimeout(() => {
+      setFloatingReactions((prev) => prev.filter((r) => r.id !== newReaction.id));
+    }, 2400);
+
+    return () => clearTimeout(timer);
+  }, [room.latestReaction, myPlayerId]);
 
   // Canlı geri sayım sayacı
   useEffect(() => {
@@ -218,6 +256,47 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
       }
     } catch {}
   };
+
+  // 4. CANLI EMOJİ REAKSİYONU GÖNDER
+  const handleSendReaction = useCallback(
+    async (emoji: string) => {
+      if (reactionCooldown) return;
+      setReactionCooldown(true);
+      setTimeout(() => setReactionCooldown(false), 350);
+
+      // Kendi ekranında anında parçacık uçur
+      const localReaction: FloatingReaction = {
+        id: "local_" + Math.random().toString(36).substring(2, 8),
+        emoji,
+        senderName: me?.name || "Sen",
+        isMe: true,
+        xPercent: 20 + Math.random() * 25,
+      };
+      soundManager.playReaction();
+      setFloatingReactions((prev) => [...prev.slice(-8), localReaction]);
+      setTimeout(() => {
+        setFloatingReactions((prev) => prev.filter((r) => r.id !== localReaction.id));
+      }, 2400);
+
+      try {
+        const res = await fetch("/api/room", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "reaction",
+            code: room.code,
+            playerId: myPlayerId,
+            emoji,
+          }),
+        });
+        const data = await res.json();
+        if (data.room) {
+          setRoom(data.room);
+        }
+      } catch {}
+    },
+    [reactionCooldown, room.code, myPlayerId, me?.name]
+  );
 
   const isRoundWinner = room.roundWinnerId === myPlayerId;
   const isOpponentWinner = room.roundWinnerId && room.roundWinnerId !== myPlayerId;
@@ -565,7 +644,66 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
             </div>
           </div>
         )}
+        {/* ======================================================== */}
+        {/* 💬 CANLI REAKSİYON & EMOJİ FIRLATMA (LIVE REACTIONS)     */}
+        {/* ======================================================== */}
+        <div className="pt-2 border-t border-slate-100 flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-slate-400">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            <span>Canlı Emoji Fırlat (Goygoy & Reaksiyon):</span>
+          </div>
+
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-slate-800 shadow-xl max-w-full overflow-x-auto no-scrollbar">
+            {[
+              { emoji: "😂", label: "Kahkaha" },
+              { emoji: "🤫", label: "Sus" },
+              { emoji: "🔥", label: "Alev" },
+              { emoji: "👀", label: "Gözler" },
+              { emoji: "🤦‍♂️", label: "Eyvah" },
+              { emoji: "🥶", label: "Buz" },
+              { emoji: "⚽", label: "Gol" },
+              { emoji: "👏", label: "Alkış" },
+            ].map(({ emoji, label }) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => handleSendReaction(emoji)}
+                disabled={reactionCooldown}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl hover:bg-white/20 active:scale-135 transition-all flex items-center justify-center text-lg sm:text-xl cursor-pointer hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 select-none shadow-2xs"
+                title={label}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
+
+      {/* ======================================================== */}
+      {/* 🎈 UÇAN CANLI EMOJİ PARÇACIKLARI (FLOATING OVERLAY)       */}
+      {/* ======================================================== */}
+      <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+        {floatingReactions.map((r) => (
+          <div
+            key={r.id}
+            style={{ left: `${r.xPercent}%` }}
+            className="absolute bottom-20 flex flex-col items-center animate-emoji-float pointer-events-none"
+          >
+            <span
+              className={`text-[9px] font-mono font-black px-2 py-0.5 rounded-full shadow-md mb-1 whitespace-nowrap ${
+                r.isMe
+                  ? "bg-emerald-600 text-white border border-emerald-400"
+                  : "bg-indigo-600 text-white border border-indigo-400"
+              }`}
+            >
+              {r.isMe ? "Sen" : r.senderName}
+            </span>
+            <span className="text-4xl sm:text-5xl drop-shadow-lg select-none filter">
+              {r.emoji}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

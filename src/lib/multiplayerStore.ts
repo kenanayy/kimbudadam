@@ -337,5 +337,28 @@ export const multiplayerStore = {
 
     return room;
   },
+
+  /**
+   * Canlı emoji reaksiyonu gönderir
+   */
+  sendReaction(code: string, playerId: string, emoji: string): { room: MultiplayerRoom } | { error: string } {
+    const cleanCode = code.trim().toUpperCase();
+    const room = rooms.get(cleanCode);
+    if (!room) return { error: "Oda bulunamadı" };
+
+    const senderName =
+      room.host.id === playerId ? room.host.name : room.guest?.name || "Rakip";
+
+    const reaction = {
+      id: "r_" + Math.random().toString(36).substring(2, 9),
+      senderId: playerId,
+      senderName,
+      emoji,
+      timestamp: Date.now(),
+    };
+
+    room.latestReaction = reaction;
+    return { room };
+  },
 };
 

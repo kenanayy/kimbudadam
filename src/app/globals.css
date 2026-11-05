@@ -64,6 +64,34 @@
   animation: neon-card-pulse 2.2s ease-in-out infinite;
 }
 
+/* Canlı Emoji Reaksiyonu Uçuş Animasyonu */
+@keyframes emoji-float-burst {
+  0% {
+    transform: translateY(0) scale(0.4) rotate(-6deg);
+    opacity: 0;
+  }
+  15% {
+    transform: translateY(-25px) scale(1.25) rotate(6deg);
+    opacity: 1;
+  }
+  35% {
+    transform: translateY(-75px) scale(1) rotate(-4deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-180px) scale(0.95) rotate(3deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-280px) scale(0.65) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+.animate-emoji-float {
+  animation: emoji-float-burst 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
 /* Gizli Kaydırma Çubuğu - Yatay Listelerde Temiz Görünüm */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

@@ -488,6 +488,35 @@ class SoundManager {
   }
 
   /**
+   * 4.7. 💬 CANLI REAKSİYON / EMOJİ SESİ (Playful Pop / Swoosh)
+   */
+  playReaction() {
+    if (!this.enabled) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.22, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.13);
+    } catch {}
+  }
+
+  /**
    * 5. 📢 HAKEM BAŞLAMA DÜDÜĞÜ (Oyuna Başlarken Çalan Hakiki Düdük)
    */
   playGameStart() {

@@ -26,6 +26,14 @@ export interface MultiplayerGuessEvent {
   timestamp: number;
 }
 
+export interface MultiplayerReaction {
+  id: string;
+  senderId: string;
+  senderName: string;
+  emoji: string;
+  timestamp: number;
+}
+
 export interface MultiplayerRoom {
   code: string;               // 4 haneli oda kodu (Örn: "1905", "GOL1")
   status: RoomStatus;
@@ -40,6 +48,7 @@ export interface MultiplayerRoom {
   roundDurationSeconds: number; // Her tur için süre (45 saniye)
   actionNotice?: string;      // Ekranda kayan canlı TV bildirimi ("Kenan golü attı! 1-0")
   recentGuesses: MultiplayerGuessEvent[]; // Canlı tahmin akışı (Mind Games)
+  latestReaction?: MultiplayerReaction;  // Canlı emoji reaksiyonu
   rematchVotes: string[];     // Rövanş isteyen oyuncuların ID'leri
   createdAt: number;
 }

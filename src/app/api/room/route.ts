@@ -77,6 +77,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ room });
     }
 
+    if (action === "reaction") {
+      const { code, playerId, emoji } = body;
+      if (!code || !playerId || !emoji) {
+        return NextResponse.json({ error: "Eksik parametre" }, { status: 400 });
+      }
+      const res = multiplayerStore.sendReaction(code, playerId, emoji);
+      if ("error" in res) {
+        return NextResponse.json({ error: res.error }, { status: 400 });
+      }
+      return NextResponse.json(res);
+    }
+
     return NextResponse.json({ error: "Geçersiz eylem" }, { status: 400 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Sunucu hatası";
