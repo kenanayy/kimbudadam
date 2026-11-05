@@ -460,6 +460,34 @@ class SoundManager {
   }
 
   /**
+   * 4.6. 🔔 RAKİP TAHMİN / DÜŞÜNCE SESİ (Mind Games Pop)
+   */
+  playOpponentGuess() {
+    if (!this.enabled) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(360, now);
+      osc.frequency.exponentialRampToValueAtTime(190, now + 0.14);
+
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } catch {}
+  }
+
+  /**
    * 5. 📢 HAKEM BAŞLAMA DÜDÜĞÜ (Oyuna Başlarken Çalan Hakiki Düdük)
    */
   playGameStart() {

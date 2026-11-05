@@ -85,6 +85,7 @@ export const multiplayerStore = {
       roundStartTime: Date.now(),
       roundDurationSeconds: 45,
       actionNotice: `Oda kuruldu! Kod: ${code}. 2. Oyuncu bekleniyor...`,
+      recentGuesses: [],
       rematchVotes: [],
       createdAt: Date.now(),
     };
@@ -129,6 +130,7 @@ export const multiplayerStore = {
         current.status = "PLAYING";
         current.roundStartTime = Date.now();
         current.revealedClubCount = 1;
+        current.recentGuesses = [];
         current.actionNotice = "1. Tur Başladı! Kim Bu Adam?";
       }
     }, 2500);
@@ -204,8 +206,15 @@ export const multiplayerStore = {
         current.status = "PLAYING";
         current.roundStartTime = Date.now();
         current.actionNotice = `${nextRound + 1}. Tur Başladı! Hızlı olan kazanır!`;
-        if (current.host) current.host.lastGuess = undefined;
-        if (current.guest) current.guest.lastGuess = undefined;
+        current.recentGuesses = [];
+        if (current.host) {
+          current.host.lastGuess = undefined;
+          current.host.isCorrect = undefined;
+        }
+        if (current.guest) {
+          current.guest.lastGuess = undefined;
+          current.guest.isCorrect = undefined;
+        }
       }
     }, 3200);
   },
@@ -227,6 +236,29 @@ export const multiplayerStore = {
       room.host.id === playerId ? room.host.name : room.guest?.name || "Rakip";
 
     const isCorrect = guessedPlayerId === targetPlayerId;
+    const guessedPlayerName = guessedPlayer?.name || "Bilinmeyen";
+
+    const guessEvent = {
+      id: "g_" + Math.random().toString(36).substring(2, 9),
+      playerId,
+      playerName,
+      guessedPlayerName,
+      isCorrect,
+      timestamp: Date.now(),
+    };
+
+    if (!room.recentGuesses) {
+      room.recentGuesses = [];
+    }
+    room.recentGuesses = [guessEvent, ...room.recentGuesses].slice(0, 10);
+
+    if (room.host.id === playerId) {
+      room.host.lastGuess = guessedPlayerName;
+      room.host.isCorrect = isCorrect;
+    } else if (room.guest) {
+      room.guest.lastGuess = guessedPlayerName;
+      room.guest.isCorrect = isCorrect;
+    }
 
     if (isCorrect) {
       // DOĞRU BİLDİ - GOL!
@@ -238,12 +270,7 @@ export const multiplayerStore = {
       return { room, isCorrect: true };
     } else {
       // YANLIŞ TAHMİN
-      if (room.host.id === playerId) {
-        room.host.lastGuess = guessedPlayer?.name || "Bilinmeyen";
-      } else if (room.guest) {
-        room.guest.lastGuess = guessedPlayer?.name || "Bilinmeyen";
-      }
-      room.actionNotice = `${playerName} yanlış tahmin yaptı: "${guessedPlayer?.name || ""}"`;
+      room.actionNotice = `${playerName} yanlış tahmin yaptı: "${guessedPlayerName}"`;
       return { room, isCorrect: false };
     }
   },
@@ -290,9 +317,16 @@ export const multiplayerStore = {
       room.currentRoundIndex = 0;
       room.revealedClubCount = 1;
       room.roundWinnerId = null;
+      room.recentGuesses = [];
       room.rematchVotes = [];
       room.host.score = 0;
-      if (room.guest) room.guest.score = 0;
+      room.host.lastGuess = undefined;
+      room.host.isCorrect = undefined;
+      if (room.guest) {
+        room.guest.score = 0;
+        room.guest.lastGuess = undefined;
+        room.guest.isCorrect = undefined;
+      }
       room.status = "PLAYING";
       room.roundStartTime = Date.now();
       room.actionNotice = "🔥 RÖVANŞ BAŞLADI! 1. Tur!";

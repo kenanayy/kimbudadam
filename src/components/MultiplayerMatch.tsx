@@ -16,6 +16,9 @@ import {
   RotateCcw,
   Volume2,
   VolumeX,
+  Brain,
+  Eye,
+  Zap,
 } from "lucide-react";
 
 interface MultiplayerMatchProps {
@@ -37,6 +40,8 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   const [timeLeft, setTimeLeft] = useState<number>(45);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [rematchRequested, setRematchRequested] = useState<boolean>(false);
+  const [opponentGuessFlash, setOpponentGuessFlash] = useState<string | null>(null);
+  const lastSeenOpponentGuessIdRef = React.useRef<string | null>(null);
 
   const isHost = room.host.id === myPlayerId;
   const me = isHost ? room.host : room.guest;
@@ -63,6 +68,31 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
 
     return () => clearInterval(interval);
   }, [room.code, myPlayerId]);
+
+  // Rakip tahmin yaptığında canlı uyarı göster ve ses çal (Mind Games)
+  useEffect(() => {
+    if (!room.recentGuesses || room.recentGuesses.length === 0) return;
+    const latestOpponentGuess = room.recentGuesses.find(
+      (g) => g.playerId !== myPlayerId
+    );
+
+    if (
+      latestOpponentGuess &&
+      latestOpponentGuess.id !== lastSeenOpponentGuessIdRef.current
+    ) {
+      lastSeenOpponentGuessIdRef.current = latestOpponentGuess.id;
+      if (!latestOpponentGuess.isCorrect) {
+        soundManager.playOpponentGuess();
+        setOpponentGuessFlash(
+          `${latestOpponentGuess.playerName}: "${latestOpponentGuess.guessedPlayerName}" dedi ❌`
+        );
+        const timer = setTimeout(() => {
+          setOpponentGuessFlash(null);
+        }, 4000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [room.recentGuesses, myPlayerId]);
 
   // Canlı geri sayım sayacı
   useEffect(() => {
@@ -221,6 +251,16 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
                 <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
                   {me?.name || "Sen"}
                 </span>
+                {me?.lastGuess && (
+                  <span
+                    className={`text-[10px] font-mono font-bold block truncate max-w-[90px] sm:max-w-[130px] ${
+                      me.isCorrect ? "text-emerald-600 font-extrabold" : "text-rose-500"
+                    }`}
+                    title={me.lastGuess}
+                  >
+                    {me.isCorrect ? "⚽ " : "❌ "}&ldquo;{me.lastGuess}&rdquo;
+                  </span>
+                )}
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-mono font-black text-lg sm:text-xl flex items-center justify-center shadow-md shrink-0">
                 {me?.score || 0}
@@ -253,6 +293,16 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
                 <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
                   {opponent?.name || "Rakip Bekleniyor"}
                 </span>
+                {opponent?.lastGuess && (
+                  <span
+                    className={`text-[10px] font-mono font-bold block truncate max-w-[90px] sm:max-w-[130px] ${
+                      opponent.isCorrect ? "text-emerald-600 font-extrabold" : "text-rose-500 font-extrabold"
+                    }`}
+                    title={opponent.lastGuess}
+                  >
+                    {opponent.isCorrect ? "⚽ " : "❌ "}&ldquo;{opponent.lastGuess}&rdquo;
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -278,6 +328,21 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
             <span className="truncate text-slate-200">
               {room.actionNotice}
+            </span>
+          </div>
+        )}
+
+        {/* Canlı Rakip Yanlış Tahmin Alarmı (Mind Games Flash) */}
+        {opponentGuessFlash && (
+          <div className="mt-2.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 text-white text-xs font-mono font-bold flex items-center justify-between gap-2 shadow-lg shadow-rose-900/25 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-2 truncate min-w-0">
+              <span className="text-base animate-bounce">👀</span>
+              <span className="truncate">
+                AKIL OYUNLARI: <span className="underline decoration-white/60">{opponentGuessFlash}</span>
+              </span>
+            </div>
+            <span className="text-[10px] font-sans font-black bg-white text-rose-800 px-2 py-0.5 rounded-full uppercase shrink-0 shadow-xs">
+              Fırsat Sende! 🔥
             </span>
           </div>
         )}
@@ -428,6 +493,60 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
         {/* ======================================================== */}
         {room.status === "PLAYING" && (
           <div className="space-y-3 pt-1">
+            {/* 🧠 CANLI TAHMİN AKIŞI & AKIL OYUNLARI */}
+            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-black text-slate-800">
+                  <Brain className="w-4 h-4 text-purple-600" />
+                  <span>CANLI TAHMİN AKIŞI</span>
+                  <span className="text-[10px] font-mono font-bold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-md border border-purple-200">
+                    Akıl Oyunları
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-slate-400 font-bold">
+                  Bu Tur: {room.recentGuesses?.length || 0} deneme
+                </span>
+              </div>
+
+              {(!room.recentGuesses || room.recentGuesses.length === 0) ? (
+                <div className="text-center py-2 text-xs text-slate-600 font-medium italic">
+                  ⏳ Bu turda henüz kimse tahminde bulunmadı. Rakibinin yanlışlarını burada canlı göreceksin!
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                  {room.recentGuesses.map((g) => {
+                    const isMe = g.playerId === myPlayerId;
+                    return (
+                      <div
+                        key={g.id}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition-all animate-in zoom-in-95 duration-150 ${
+                          isMe
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-950"
+                            : "bg-indigo-50 border-indigo-200 text-indigo-950 shadow-xs ring-1 ring-indigo-300/40"
+                        }`}
+                      >
+                        <span
+                          className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md font-black uppercase ${
+                            isMe
+                              ? "bg-emerald-200/90 text-emerald-800"
+                              : "bg-indigo-200/90 text-indigo-800"
+                          }`}
+                        >
+                          {isMe ? "Sen" : g.playerName}
+                        </span>
+                        <span className="truncate max-w-[130px] sm:max-w-[190px] font-black">
+                          &ldquo;{g.guessedPlayerName}&rdquo;
+                        </span>
+                        <span className="text-xs">
+                          {g.isCorrect ? "⚽ Gol!" : "❌"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <PlayerSearch
               allPlayers={PLAYERS}
               guessedPlayerIds={guesses}
