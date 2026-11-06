@@ -52,6 +52,7 @@ export interface MultiplayerRoom {
   recentGuesses: MultiplayerGuessEvent[]; // Canlı tahmin akışı (Mind Games)
   latestReaction?: MultiplayerReaction;  // Canlı emoji reaksiyonu
   rematchVotes: string[];     // Rövanş isteyen oyuncuların ID'leri
+  transitionAt?: number;      // Serverless için durum geçiş timestamp'i (ms)
   createdAt: number;
 }
 

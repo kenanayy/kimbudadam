@@ -80,6 +80,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (action === "forfeit") {
+      const { code, playerId } = body;
+      if (!code || !playerId) {
+        return NextResponse.json({ error: "Eksik parametre" }, { status: 400 });
+      }
+      const res = multiplayerStore.forfeitRound(code, playerId);
+      if ("error" in res) {
+        return NextResponse.json({ error: res.error }, { status: 400 });
+      }
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(res.room),
+      });
+    }
+
     if (action === "rematch") {
       const { code, playerId } = body;
       if (!code || !playerId) {

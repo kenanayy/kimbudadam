@@ -233,7 +233,30 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
     } catch {}
   }, [room.code, room.status, myPlayerId]);
 
-  // 3. RÖVANŞ İSTE
+  // 3. PES ET (TURU RAKİBİNE DEVRET)
+  const handleGiveUp = useCallback(async () => {
+    if (room.status !== "PLAYING") return;
+    soundManager.playGameOver();
+
+    try {
+      const res = await fetch("/api/room", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "forfeit",
+          code: room.code,
+          playerId: myPlayerId,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.room) {
+        setRoom(data.room);
+      }
+    } catch {}
+  }, [room.code, room.status, myPlayerId]);
+
+  // 4. RÖVANŞ İSTE
   const handleRematch = async () => {
     setRematchRequested(true);
     soundManager.playClick();
@@ -636,7 +659,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
               disabled={room.status !== "PLAYING"}
               onGuess={handleGuess}
               onSkip={handleSkip}
-              onGiveUp={() => {}}
+              onGiveUp={handleGiveUp}
               canSkip={false}
               isLastChance={false}
             />

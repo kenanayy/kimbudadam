@@ -192,20 +192,82 @@ export const multiplayerStore = {
     room.status = "STARTING";
     room.actionNotice = `${guest.name} odaya katıldı! Maç birazdan başlıyor...`;
     room.roundStartTime = Date.now();
-
-    // 2.5 saniye sonra maçı başlat
-    setTimeout(() => {
-      const current = rooms.get(cleanCode);
-      if (current && current.status === "STARTING") {
-        current.status = "PLAYING";
-        current.roundStartTime = Date.now();
-        current.revealedClubCount = 1;
-        current.recentGuesses = [];
-        current.actionNotice = "1. Tur Başladı! Kim Bu Adam?";
-      }
-    }, 2500);
+    room.transitionAt = Date.now() + 2500; // 2.5 saniye sonra PLAYING durumuna geç
 
     return { room, playerId: guestId };
+  },
+
+  /**
+   * Serverless Uyumlu Durum Senkronizasyonu:
+   * Node süreci (container) dursa bile zaman damgaları (timestamp) ile
+   * odayı her sorgulamada otomatik olarak doğru faza ilerletir.
+   */
+  syncRoomState(room: MultiplayerRoom): MultiplayerRoom {
+    const now = Date.now();
+
+    // 1. STARTING -> PLAYING geçişi (Maç başlangıcı sayacı)
+    if (room.status === "STARTING") {
+      if (room.transitionAt && now >= room.transitionAt) {
+        room.status = "PLAYING";
+        room.transitionAt = undefined;
+        room.roundStartTime = now;
+        room.revealedClubCount = 1;
+        room.recentGuesses = [];
+        room.actionNotice = "1. Tur Başladı! Kim Bu Adam?";
+      }
+    }
+
+    // 2. PLAYING -> ROUND_OVER geçişi (45 saniyelik sürenin dolması)
+    if (room.status === "PLAYING") {
+      const elapsedSeconds = Math.floor((now - room.roundStartTime) / 1000);
+      if (elapsedSeconds >= room.roundDurationSeconds) {
+        room.status = "ROUND_OVER";
+        room.roundWinnerId = null;
+        room.transitionAt = now + 3500; // 3.5 saniye kutlama / açığa çıkma süresi
+        room.actionNotice = "⏱️ Süre Doldu! Bu turda gol çıkmadı.";
+      }
+    }
+
+    // 3. ROUND_OVER -> Sıradaki Tura (PLAYING) veya Maç Sonuna (GAME_OVER) geçiş
+    if (room.status === "ROUND_OVER") {
+      if (room.transitionAt && now >= room.transitionAt) {
+        const nextRound = room.currentRoundIndex + 1;
+        if (nextRound >= room.roundsCount) {
+          // MAÇ TAMAMLANDI
+          room.status = "GAME_OVER";
+          room.transitionAt = undefined;
+          const hostScore = room.host.score;
+          const guestScore = room.guest?.score || 0;
+          if (hostScore > guestScore) {
+            room.actionNotice = `🏆 MAÇ SONUCU: ${room.host.name} KAZANDI! (${hostScore} - ${guestScore})`;
+          } else if (guestScore > hostScore) {
+            room.actionNotice = `🏆 MAÇ SONUCU: ${room.guest?.name || "Misafir"} KAZANDI! (${guestScore} - ${hostScore})`;
+          } else {
+            room.actionNotice = `🤝 MAÇ SONUCU: DOSTLUK KAZANDI! BERABERE (${hostScore} - ${guestScore})`;
+          }
+        } else {
+          // YENİ TUR BAŞLAT
+          room.currentRoundIndex = nextRound;
+          room.revealedClubCount = 1;
+          room.roundWinnerId = null;
+          room.status = "PLAYING";
+          room.transitionAt = undefined;
+          room.roundStartTime = now;
+          room.actionNotice = `${nextRound + 1}. Tur Başladı! Hızlı olan kazanır!`;
+          room.recentGuesses = [];
+          if (room.host) {
+            room.host.lastGuess = undefined;
+            room.host.isCorrect = undefined;
+          }
+          if (room.guest) {
+            room.guest.lastGuess = undefined;
+            room.guest.isCorrect = undefined;
+          }
+        }
+      }
+    }
+
+    return room;
   },
 
   /**
@@ -222,14 +284,8 @@ export const multiplayerStore = {
       if (room.guest?.id === playerId) room.guest.lastActive = Date.now();
     }
 
-    // Eğer oyun oynanıyorsa ve süre dolmuşsa turu bitir
-    if (room.status === "PLAYING") {
-      const elapsedSeconds = Math.floor((Date.now() - room.roundStartTime) / 1000);
-      if (elapsedSeconds >= room.roundDurationSeconds) {
-        // Süre doldu
-        this.finishRound(cleanCode, null, "Süre Doldu! Bu turda gol çıkmadı.");
-      }
-    }
+    // Durum senkronizasyonu
+    this.syncRoomState(room);
 
     return room;
   },
@@ -243,50 +299,13 @@ export const multiplayerStore = {
 
     room.status = "ROUND_OVER";
     room.roundWinnerId = winnerId;
+    room.transitionAt = Date.now() + 3500; // 3.5 saniye sonra sonraki tura geç
     room.actionNotice = notice;
 
     if (winnerId) {
       if (room.host.id === winnerId) room.host.score += 1;
       if (room.guest && room.guest.id === winnerId) room.guest.score += 1;
     }
-
-    // 3.2 saniye sonra sıradaki tura geç veya maçı bitir
-    setTimeout(() => {
-      const current = rooms.get(code);
-      if (!current) return;
-
-      const nextRound = current.currentRoundIndex + 1;
-      if (nextRound >= current.roundsCount) {
-        // MAÇ BİTTİ
-        current.status = "GAME_OVER";
-        const hostScore = current.host.score;
-        const guestScore = current.guest?.score || 0;
-        if (hostScore > guestScore) {
-          current.actionNotice = `🏆 MAÇ SONUCU: ${current.host.name} KAZANDI! (${hostScore} - ${guestScore})`;
-        } else if (guestScore > hostScore) {
-          current.actionNotice = `🏆 MAÇ SONUCU: ${current.guest?.name || "Misafir"} KAZANDI! (${guestScore} - ${hostScore})`;
-        } else {
-          current.actionNotice = `🤝 MAÇ SONUCU: DOSTLUK KAZANDI! BERABERE (${hostScore} - ${guestScore})`;
-        }
-      } else {
-        // SIRADAKİ TUR
-        current.currentRoundIndex = nextRound;
-        current.revealedClubCount = 1;
-        current.roundWinnerId = null;
-        current.status = "PLAYING";
-        current.roundStartTime = Date.now();
-        current.actionNotice = `${nextRound + 1}. Tur Başladı! Hızlı olan kazanır!`;
-        current.recentGuesses = [];
-        if (current.host) {
-          current.host.lastGuess = undefined;
-          current.host.isCorrect = undefined;
-        }
-        if (current.guest) {
-          current.guest.lastGuess = undefined;
-          current.guest.isCorrect = undefined;
-        }
-      }
-    }, 3200);
   },
 
   /**
@@ -303,6 +322,10 @@ export const multiplayerStore = {
 
     const room = rooms.get(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
+
+    // Önce durum senkronizasyonu yap (Süre dolduysa durumu günceller)
+    this.syncRoomState(room);
+
     if (room.status !== "PLAYING") return { error: "Oyun şu anda tahmin kabul etmiyor" };
 
     const targetPlayerId = room.playerIds[room.currentRoundIndex];
@@ -312,8 +335,12 @@ export const multiplayerStore = {
     const playerName =
       room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Rakip";
 
-    const isCorrect = cleanGuessedId === targetPlayerId;
-    const guessedPlayerName = guessedPlayer?.name || "Bilinmeyen";
+    // Büyük/küçük harf duyarsız ve boşluksuz ID karşılaştırması
+    const isCorrect =
+      Boolean(cleanGuessedId && targetPlayerId) &&
+      cleanGuessedId.trim().toLowerCase() === targetPlayerId.trim().toLowerCase();
+
+    const guessedPlayerName = guessedPlayer?.name || cleanGuessedId;
 
     const guessEvent = {
       id: "g_" + Math.random().toString(36).substring(2, 9),
@@ -342,7 +369,7 @@ export const multiplayerStore = {
       this.finishRound(
         cleanCode,
         cleanPlayerId,
-        `⚽ GOOOOL! ${playerName} doğru bildi: ${targetPlayer?.name || ""}`
+        `⚽ GOOOOL! ${playerName} doğru bildi: ${targetPlayer?.name || guessedPlayerName}`
       );
       return { room, isCorrect: true };
     } else {
@@ -350,6 +377,38 @@ export const multiplayerStore = {
       room.actionNotice = `${playerName} yanlış tahmin yaptı: "${guessedPlayerName}"`;
       return { room, isCorrect: false };
     }
+  },
+
+  /**
+   * Pes etme / Turu terk etme
+   */
+  forfeitRound(code: string, playerId: string): { room: MultiplayerRoom } | { error: string } {
+    const cleanCode = sanitizeInput(code, 6).toUpperCase();
+    const cleanPlayerId = sanitizeInput(playerId, 40);
+
+    const room = rooms.get(cleanCode);
+    if (!room) return { error: "Oda bulunamadı" };
+
+    this.syncRoomState(room);
+    if (room.status !== "PLAYING") return { error: "Oyun şu anda aktif değil" };
+
+    const forfeiterName =
+      room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Oyuncu";
+    const opponentId =
+      room.host.id === cleanPlayerId ? room.guest?.id || null : room.host.id;
+    const opponentName =
+      room.host.id === cleanPlayerId ? room.guest?.name || "Rakip" : room.host.name;
+
+    const targetPlayerId = room.playerIds[room.currentRoundIndex];
+    const targetPlayer = PLAYERS.find((p) => p.id === targetPlayerId);
+
+    this.finishRound(
+      cleanCode,
+      opponentId,
+      `🏳️ ${forfeiterName} pes etti! Gol ${opponentName}'e yazıldı. Doğru cevap: ${targetPlayer?.name || ""}`
+    );
+
+    return { room };
   },
 
   /**
