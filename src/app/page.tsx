@@ -123,6 +123,31 @@ export default function FootballerGuessPage() {
           setUrlRoomCode(oda.toUpperCase());
           setIsMultiplayerOpen(true);
         }
+
+        // Aktif multiplayer oturumu varsa geri yükle (Sayfa yenilendiğinde maçı kaybetmeme)
+        try {
+          const activeMpRaw = localStorage.getItem("mp_active_session");
+          if (activeMpRaw) {
+            const { code, playerId } = JSON.parse(activeMpRaw);
+            if (code && playerId) {
+              fetch(`/api/room?code=${code}&playerId=${playerId}&_t=${Date.now()}`, {
+                cache: "no-store",
+                headers: { "Cache-Control": "no-cache" },
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.room && data.room.status !== "GAME_OVER") {
+                    setMultiplayerRoom(data.room);
+                    setMyPlayerId(playerId);
+                    setView("MULTIPLAYER");
+                  } else {
+                    localStorage.removeItem("mp_active_session");
+                  }
+                })
+                .catch(() => {});
+            }
+          }
+        } catch {}
       }
     } catch {}
   }, []);
@@ -195,6 +220,9 @@ export default function FootballerGuessPage() {
   };
 
   const handleLeaveMultiplayerMatch = () => {
+    try {
+      localStorage.removeItem("mp_active_session");
+    } catch {}
     setMultiplayerRoom(null);
     setMyPlayerId(null);
     setView("MENU");

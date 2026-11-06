@@ -94,8 +94,12 @@ export const PlayerSearch: React.FC<PlayerSearchProps> = ({
       setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (filteredPlayers.length > 0 && isOpen) {
-        handleSelect(filteredPlayers[selectedIndex]);
+      if (filteredPlayers.length > 0) {
+        const safeIdx =
+          selectedIndex >= 0 && selectedIndex < filteredPlayers.length
+            ? selectedIndex
+            : 0;
+        handleSelect(filteredPlayers[safeIdx]);
       }
     } else if (e.key === "Escape") {
       setIsOpen(false);
@@ -196,6 +200,11 @@ export const PlayerSearch: React.FC<PlayerSearchProps> = ({
               return (
                 <button
                   key={player.id}
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelect(player);
+                  }}
                   onClick={() => handleSelect(player)}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between transition-colors cursor-pointer ${

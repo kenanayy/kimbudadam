@@ -54,7 +54,13 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/room?code=${createdRoom.code}&playerId=${myPlayerId}`);
+        const res = await fetch(
+          `/api/room?code=${createdRoom.code}&playerId=${myPlayerId}&_t=${Date.now()}`,
+          {
+            cache: "no-store",
+            headers: { "Cache-Control": "no-cache" },
+          }
+        );
         if (!res.ok) return;
         const data = await res.json();
         if (data.room) {

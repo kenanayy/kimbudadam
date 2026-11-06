@@ -19,6 +19,8 @@ import {
   Brain,
   Eye,
   Zap,
+  Swords,
+  AlertCircle,
 } from "lucide-react";
 
 interface MultiplayerMatchProps {
@@ -48,6 +50,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   const [timeLeft, setTimeLeft] = useState<number>(45);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [rematchRequested, setRematchRequested] = useState<boolean>(false);
+  const [guessError, setGuessError] = useState<string | null>(null);
   const [opponentGuessFlash, setOpponentGuessFlash] = useState<string | null>(null);
   const lastSeenOpponentGuessIdRef = React.useRef<string | null>(null);
 
@@ -68,15 +71,34 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   // Tur veya maç bittiğinde açılan resmi futbolcu bilgisi
   const revealedPlayer: Player | null = room.revealedPlayer || null;
 
+  // Aktif oturumu sakla
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "mp_active_session",
+        JSON.stringify({ code: room.code, playerId: myPlayerId })
+      );
+    } catch {}
+  }, [room.code, myPlayerId]);
+
   // Canlı polling döngüsü (700ms - Odayı sürekli senkronize eder)
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/room?code=${room.code}&playerId=${myPlayerId}`);
+        const res = await fetch(
+          `/api/room?code=${room.code}&playerId=${myPlayerId}&_t=${Date.now()}`,
+          {
+            cache: "no-store",
+            headers: { "Cache-Control": "no-cache" },
+          }
+        );
         if (!res.ok) return;
         const data = await res.json();
         if (data.room) {
           setRoom(data.room);
+          if (data.room.status === "PLAYING") {
+            setRematchRequested(false);
+          }
         }
       } catch {}
     }, 700);
@@ -183,6 +205,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   const handleGuess = useCallback(
     async (player: Player) => {
       if (room.status !== "PLAYING") return;
+      setGuessError(null);
 
       setGuesses((prev) => [...prev, player.id]);
 
@@ -204,8 +227,14 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
           if (!data.isCorrect) {
             soundManager.playWrong();
           }
+        } else if (data.error) {
+          setGuessError(data.error);
+          setTimeout(() => setGuessError(null), 3500);
         }
-      } catch {}
+      } catch {
+        setGuessError("Bağlantı hatası oluştu, lütfen tekrar deneyin.");
+        setTimeout(() => setGuessError(null), 3500);
+      }
     },
     [room.code, room.status, myPlayerId]
   );
@@ -236,6 +265,9 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   // 3. PES ET (TURU RAKİBİNE DEVRET)
   const handleGiveUp = useCallback(async () => {
     if (room.status !== "PLAYING") return;
+    const confirm = window.confirm("Bu turdan pes etmek istiyor musun? Gol rakibine yazılacak.");
+    if (!confirm) return;
+
     soundManager.playGameOver();
 
     try {
@@ -252,9 +284,22 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
       const data = await res.json();
       if (data.room) {
         setRoom(data.room);
+      } else if (data.error) {
+        setGuessError(data.error);
+        setTimeout(() => setGuessError(null), 3000);
       }
-    } catch {}
+    } catch {
+      setGuessError("Pes etme işlemi gerçekleştirilemedi.");
+      setTimeout(() => setGuessError(null), 3000);
+    }
   }, [room.code, room.status, myPlayerId]);
+
+  const handleExitMatch = () => {
+    try {
+      localStorage.removeItem("mp_active_session");
+    } catch {}
+    onLeaveMatch();
+  };
 
   // 4. RÖVANŞ İSTE
   const handleRematch = async () => {
@@ -336,7 +381,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
           {/* Menüden Ayrıl Butonu */}
           <button
             type="button"
-            onClick={onLeaveMatch}
+            onClick={handleExitMatch}
             className="flex items-center gap-1 text-xs text-slate-700 hover:text-black py-1.5 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all cursor-pointer font-bold shrink-0"
             title="Maçtan Çık"
           >
@@ -500,6 +545,31 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
         />
 
         {/* ======================================================== */}
+        {/* DURUM 0: MAÇ BAŞLIYOR (ISINMA / GERİ SAYIM)              */}
+        {/* ======================================================== */}
+        {room.status === "STARTING" && (
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-emerald-500/40 text-white text-center space-y-3 animate-in zoom-in-95 duration-200 shadow-xl">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-md animate-bounce">
+              <Swords className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold block mb-1">
+                RAKİP BAĞLANDI
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-white">
+                1v1 Canlı Derbi Başlıyor!
+              </h3>
+              <p className="text-xs text-slate-300 font-mono mt-1">
+                {room.actionNotice || "Hazır ol! 1. tur birazdan başlıyor..."}
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-black animate-pulse">
+              <span>⚡ KULÜPLER AÇILIYOR...</span>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
         {/* DURUM A: TUR SONU (GOL ATILDI VEYA SÜRE DOLDU)           */}
         {/* ======================================================== */}
         {room.status === "ROUND_OVER" && (
@@ -585,7 +655,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
 
               <button
                 type="button"
-                onClick={onLeaveMatch}
+                onClick={handleExitMatch}
                 className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-600 transition-all cursor-pointer"
               >
                 Menüye Dön
@@ -652,6 +722,14 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Hata Bildirimi */}
+            {guessError && (
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-mono font-bold text-center flex items-center justify-center gap-2 animate-in slide-in-from-top-1 duration-200">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{guessError}</span>
+              </div>
+            )}
 
             <PlayerSearch
               allPlayers={PLAYERS}
