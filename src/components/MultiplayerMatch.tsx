@@ -60,11 +60,13 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   const me = isHost ? room.host : room.guest;
   const opponent = isHost ? room.guest : room.host;
 
-  // O anki gizemli futbolcuyu bul
-  const targetPlayerId = room.playerIds[room.currentRoundIndex];
-  const targetPlayer: Player | undefined = useMemo(() => {
-    return PLAYERS.find((p) => p.id === targetPlayerId) || PLAYERS[0];
-  }, [targetPlayerId]);
+  // 🛡️ Hile korumalı: O anki gizemli futbolcunun kariyeri sunucudan anonim olarak gelir
+  const currentCareer = useMemo(() => {
+    return room.currentCareer || [];
+  }, [room.currentCareer]);
+
+  // Tur veya maç bittiğinde açılan resmi futbolcu bilgisi
+  const revealedPlayer: Player | null = room.revealedPlayer || null;
 
   // Canlı polling döngüsü (700ms - Odayı sürekli senkronize eder)
   useEffect(() => {
@@ -435,9 +437,9 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <PlayerAvatar
-              player={targetPlayer}
+              player={revealedPlayer}
               size="md"
-              isMystery={room.status === "PLAYING"}
+              isMystery={room.status === "PLAYING" || !revealedPlayer}
               className="shadow-md"
             />
             <div>
@@ -445,9 +447,9 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
                 1v1 CANLI MAÇ
               </span>
               <h2 className="text-base sm:text-lg font-black text-slate-950 truncate mt-0.5">
-                {room.status === "PLAYING"
+                {room.status === "PLAYING" || !revealedPlayer
                   ? "Gizemli Futbolcu (Kim Bu Adam?)"
-                  : targetPlayer.name}
+                  : revealedPlayer.name}
               </h2>
               <p className="text-xs text-slate-500 font-medium">
                 İlk doğru tahmin eden golü atar!
@@ -460,15 +462,15 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
               Kariyer Rotası
             </span>
             <span className="text-xs sm:text-sm font-black font-mono text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-lg border border-emerald-300">
-              Tamamı Açık ({targetPlayer.career.length} Kulüp)
+              Tamamı Açık ({currentCareer.length} Kulüp)
             </span>
           </div>
         </div>
 
         {/* TRANSFER ROTASI (1v1'DE TÜM KULÜPLER BAŞTAN AÇIK) */}
         <CareerTimeline
-          career={targetPlayer.career}
-          revealedCount={targetPlayer.career.length}
+          career={currentCareer}
+          revealedCount={currentCareer.length}
           isGameOver={room.status !== "PLAYING"}
           showLeague={true}
           embedded={true}
@@ -501,17 +503,19 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-3 pt-1">
-              <PlayerAvatar player={targetPlayer} size="sm" isMystery={false} />
-              <div className="text-left">
-                <span className="text-sm font-extrabold block text-slate-900">
-                  {targetPlayer.name}
-                </span>
-                <span className="text-xs text-slate-500 font-medium">
-                  {targetPlayer.position} • {targetPlayer.nationality} {targetPlayer.flag} ({targetPlayer.currentStatus})
-                </span>
+            {revealedPlayer && (
+              <div className="flex items-center justify-center gap-3 pt-1">
+                <PlayerAvatar player={revealedPlayer} size="sm" isMystery={false} />
+                <div className="text-left">
+                  <span className="text-sm font-extrabold block text-slate-900">
+                    {revealedPlayer.name}
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    {revealedPlayer.position} • {revealedPlayer.nationality} {revealedPlayer.flag} ({revealedPlayer.currentStatus})
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
             <p className="text-xs font-mono font-bold text-slate-400 pt-1">
               Sıradaki tura geçiliyor...

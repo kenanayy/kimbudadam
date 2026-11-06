@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getClubBadge } from "@/data/clubLogos";
 import { Shield } from "lucide-react";
 
@@ -19,6 +19,11 @@ export const ClubLogo: React.FC<ClubLogoProps> = ({
 }) => {
   const [imgError, setImgError] = useState(false);
   const badge = getClubBadge(clubName);
+
+  // Kulüp veya logo URL'i değiştiğinde hata durumunu sıfırla
+  useEffect(() => {
+    setImgError(false);
+  }, [clubName, badge.logoUrl]);
 
   // Boyut eşleşmeleri
   const sizeClasses = {
@@ -62,6 +67,7 @@ export const ClubLogo: React.FC<ClubLogoProps> = ({
           width={imageSizes[size]}
           height={imageSizes[size]}
           loading="lazy"
+          referrerPolicy="no-referrer"
           className="object-contain p-0.5 max-w-full max-h-full drop-shadow-2xs"
           onError={() => setImgError(true)}
         />

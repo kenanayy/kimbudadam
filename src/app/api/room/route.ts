@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Oda bulunamadı" }, { status: 404 });
   }
 
-  return NextResponse.json({ room });
+  // 🛡️ Hile koruması: İstemciye sadece anonimleştirilmiş güvenli oda nesnesi gönderilir
+  return NextResponse.json({ room: multiplayerStore.sanitizeRoomForClient(room) });
 }
 
 export async function POST(req: NextRequest) {
@@ -26,7 +27,13 @@ export async function POST(req: NextRequest) {
     if (action === "create") {
       const { hostName, customCode } = body;
       const res = multiplayerStore.createRoom(hostName, customCode);
-      return NextResponse.json(res);
+      if ("error" in res) {
+        return NextResponse.json({ error: res.error }, { status: 400 });
+      }
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(res.room),
+        playerId: res.playerId,
+      });
     }
 
     if (action === "join") {
@@ -38,7 +45,10 @@ export async function POST(req: NextRequest) {
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400 });
       }
-      return NextResponse.json(res);
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(res.room),
+        playerId: res.playerId,
+      });
     }
 
     if (action === "guess") {
@@ -50,7 +60,10 @@ export async function POST(req: NextRequest) {
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400 });
       }
-      return NextResponse.json(res);
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(res.room),
+        isCorrect: res.isCorrect,
+      });
     }
 
     if (action === "skip") {
@@ -62,7 +75,9 @@ export async function POST(req: NextRequest) {
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400 });
       }
-      return NextResponse.json(res);
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(res.room),
+      });
     }
 
     if (action === "rematch") {
@@ -74,7 +89,9 @@ export async function POST(req: NextRequest) {
       if (!room) {
         return NextResponse.json({ error: "Oda bulunamadı" }, { status: 404 });
       }
-      return NextResponse.json({ room });
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(room),
+      });
     }
 
     if (action === "reaction") {
@@ -86,7 +103,9 @@ export async function POST(req: NextRequest) {
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400 });
       }
-      return NextResponse.json(res);
+      return NextResponse.json({
+        room: multiplayerStore.sanitizeRoomForClient(res.room),
+      });
     }
 
     return NextResponse.json({ error: "Geçersiz eylem" }, { status: 400 });
@@ -95,4 +114,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

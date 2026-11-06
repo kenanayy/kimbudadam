@@ -27,11 +27,14 @@ import {
 } from "lucide-react";
 import { FootballPitchBackground } from "@/components/FootballPitchBackground";
 import { GameLogo } from "@/components/GameLogo";
+import { DailyChallengeCard } from "@/components/DailyChallengeCard";
 import { soundManager } from "@/utils/sound";
 
 interface MainMenuProps {
   onStartGame: (difficulty: Difficulty, category: Category) => void;
   onOpenMultiplayer: () => void;
+  onStartDaily: () => void;
+  onOpenDailyResult: () => void;
   stats: GameStats;
   soundEnabled: boolean;
   onToggleSound: () => void;
@@ -203,6 +206,8 @@ const CATEGORY_META: Record<
 export const MainMenu: React.FC<MainMenuProps> = ({
   onStartGame,
   onOpenMultiplayer,
+  onStartDaily,
+  onOpenDailyResult,
   stats,
   soundEnabled,
   onToggleSound,
@@ -276,6 +281,12 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       {/* Ana Gövde */}
       <main className="relative z-10 max-w-3xl w-full mx-auto px-4 py-4 sm:py-6 flex-1 flex flex-col justify-center space-y-3.5">
         
+        {/* 🌟 GÜNÜN FUTBOLCUSU (GÜNLÜK MEYDAN OKUMA KARTI) */}
+        <DailyChallengeCard
+          onStartDaily={onStartDaily}
+          onOpenDailyResult={onOpenDailyResult}
+        />
+
         {/* 1. Kategori / Lig Havuzu Seçimi (Futbol Kart Paketleri) */}
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between text-xs px-1">

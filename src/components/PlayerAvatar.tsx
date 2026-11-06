@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Player } from "@/types/player";
 import { getPlayerImageUrl } from "@/data/playerImages";
 import { User, Sparkles, HelpCircle } from "lucide-react";
 
 interface PlayerAvatarProps {
-  player: Player;
+  player?: Player | null;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   isMystery?: boolean;
   className?: string;
@@ -21,7 +21,12 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   showFlag = true,
 }) => {
   const [imgError, setImgError] = useState(false);
-  const imageUrl = getPlayerImageUrl(player.id) || player.image;
+  const imageUrl = player ? (getPlayerImageUrl(player.id) || player.image) : undefined;
+
+  // Oyuncu veya görsel değiştiğinde hata durumunu sıfırla
+  useEffect(() => {
+    setImgError(false);
+  }, [player?.id, imageUrl]);
 
   // Boyut haritası
   const sizeMap = {
@@ -59,8 +64,8 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
 
   const currentSize = sizeMap[size];
 
-  // 1. GİZEMLİ OYUNCU DURUMU (Oyun esnasında kilitli)
-  if (isMystery) {
+  // 1. GİZEMLİ OYUNCU DURUMU (Oyun esnasında kilitli veya oyuncu gizli)
+  if (isMystery || !player) {
     return (
       <div className={`relative shrink-0 ${currentSize.box} ${className}`}>
         <div className="w-full h-full rounded-[inherit] bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 border-2 border-emerald-500/40 shadow-lg flex items-center justify-center text-emerald-400 overflow-hidden group select-none">
@@ -112,6 +117,7 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
             src={imageUrl}
             alt={player.name}
             loading="lazy"
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover object-top select-none transition-transform duration-200"
             onError={() => setImgError(true)}
           />

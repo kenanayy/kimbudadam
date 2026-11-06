@@ -16,7 +16,15 @@ import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { JokerConsole } from "@/components/JokerConsole";
 import { MultiplayerModal } from "@/components/MultiplayerModal";
 import { MultiplayerMatch } from "@/components/MultiplayerMatch";
+import { DailyGameView } from "@/components/DailyGameView";
+import { DailyResultModal } from "@/components/DailyResultModal";
 import { MultiplayerRoom } from "@/types/multiplayer";
+import { DailyGameResult, DailyStats } from "@/types/daily";
+import {
+  getDailyChallengeInfo,
+  getDailyStorage,
+  getDailyStats,
+} from "@/utils/dailyChallenge";
 import { getPlayerJerseyNumber } from "@/data/playerJerseys";
 import { soundManager } from "@/utils/sound";
 import {
@@ -31,7 +39,7 @@ import {
 } from "lucide-react";
 
 export default function FootballerGuessPage() {
-  const [view, setView] = useState<"MENU" | "GAME" | "MULTIPLAYER">("MENU");
+  const [view, setView] = useState<"MENU" | "GAME" | "MULTIPLAYER" | "DAILY">("MENU");
   const [difficulty, setDifficulty] = useState<Difficulty>("ORTA");
   const [category, setCategory] = useState<Category>("ALL");
   const [targetPlayer, setTargetPlayer] = useState<Player | null>(null);
@@ -43,6 +51,14 @@ export default function FootballerGuessPage() {
   );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+
+  // 🌟 Günün Futbolcusu Modal Durumları
+  const [isDailyResultModalOpen, setIsDailyResultModalOpen] = useState<boolean>(false);
+  const [dailyModalData, setDailyModalData] = useState<{
+    result: DailyGameResult;
+    stats: DailyStats;
+    player: Player;
+  } | null>(null);
 
   // ⚡ Canlı Multiplayer Durumları
   const [isMultiplayerOpen, setIsMultiplayerOpen] = useState<boolean>(false);
@@ -402,6 +418,22 @@ export default function FootballerGuessPage() {
         <MainMenu
           onStartGame={handleStartGame}
           onOpenMultiplayer={() => setIsMultiplayerOpen(true)}
+          onStartDaily={() => {
+            soundManager.unlock();
+            soundManager.startMusic();
+            setView("DAILY");
+          }}
+          onOpenDailyResult={() => {
+            const info = getDailyChallengeInfo();
+            const result = getDailyStorage(info.dateStr);
+            const dailyStats = getDailyStats();
+            if (result) {
+              setDailyModalData({ result, stats: dailyStats, player: info.player });
+              setIsDailyResultModalOpen(true);
+            } else {
+              setView("DAILY");
+            }
+          }}
           stats={stats}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
@@ -413,7 +445,36 @@ export default function FootballerGuessPage() {
           onStartMatch={handleStartMultiplayerMatch}
           initialCode={urlRoomCode}
         />
+        {dailyModalData && (
+          <DailyResultModal
+            isOpen={isDailyResultModalOpen}
+            result={dailyModalData.result}
+            stats={dailyModalData.stats}
+            player={dailyModalData.player}
+            onClose={() => setIsDailyResultModalOpen(false)}
+            onGoMenu={() => {
+              setIsDailyResultModalOpen(false);
+              setView("MENU");
+            }}
+            onPlayRegularGame={() => {
+              setIsDailyResultModalOpen(false);
+              handleStartGame(difficulty, category);
+            }}
+          />
+        )}
       </>
+    );
+  }
+
+  // 2. GÜNÜN FUTBOLCUSU (DAILY CHALLENGE) GÖRÜNÜMÜ
+  if (view === "DAILY") {
+    return (
+      <DailyGameView
+        onBackToMenu={() => setView("MENU")}
+        onPlayRegularGame={() => handleStartGame(difficulty, category)}
+        soundEnabled={soundEnabled}
+        onToggleSound={toggleSound}
+      />
     );
   }
 

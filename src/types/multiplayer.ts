@@ -1,4 +1,4 @@
-import { Player, GuessResult } from "@/types/player";
+import { Player, GuessResult, ClubCareer } from "@/types/player";
 
 export type RoomStatus =
   | "WAITING"     // 2. oyuncu bekleniyor
@@ -42,7 +42,9 @@ export interface MultiplayerRoom {
   roundWinnerId: string | null; // Bu tur golü atan oyuncunun ID'si (veya berabere ise null)
   roundsCount: number;        // Toplam tur sayısı (Örn: 5 tur)
   currentRoundIndex: number;  // 0'dan 4'e
-  playerIds: string[];        // Maç boyunca sorulacak 5 futbolcunun ID listesi
+  playerIds: string[];        // Maç boyunca sorulacak 5 futbolcunun ID listesi (Sunucuda saklanır, istemciden gizlenir)
+  currentCareer?: ClubCareer[]; // O anki gizemli futbolcunun kulüp kariyeri (Hile korumalı aktarım)
+  revealedPlayer?: Player | null; // Tur veya maç bittiğinde açılan resmi futbolcu bilgisi
   revealedClubCount: number;  // O anki futbolcunun kaç kulübünün açık olduğu
   roundStartTime: number;     // Turun başladığı timestamp
   roundDurationSeconds: number; // Her tur için süre (45 saniye)
