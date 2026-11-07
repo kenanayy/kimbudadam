@@ -212,7 +212,7 @@ export function formatTimeRemaining(ms: number): string {
 export function generateDailyShareText(
   result: DailyGameResult,
   stats: DailyStats,
-  siteUrl: string = typeof window !== "undefined" ? window.location.origin : "https://kimbüadam.com"
+  siteUrl: string = typeof window !== "undefined" ? window.location.origin : "https://kimbuadam.netlify.app"
 ): string {
   const statusLine = result.isWon
     ? `🎯 ${result.attemptsUsed}/${result.maxAttempts} Tahminde Bildim!`

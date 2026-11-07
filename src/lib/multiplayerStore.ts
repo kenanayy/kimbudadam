@@ -15,7 +15,9 @@ const rooms = globalThis.__multiplayer_rooms;
 
 // Güvenlik & Bellek Sınırları
 const MAX_CONCURRENT_ROOMS = 500;
-const ALLOWED_EMOJIS = new Set(["🔥", "👏", "😱", "😂", "⚽", "🧤", "🤫", "🎯", "👑", "💪"]);
+const ALLOWED_EMOJIS = new Set([
+  "🔥", "👏", "😱", "😂", "⚽", "🧤", "🤫", "🎯", "👑", "💪", "👀", "🤦‍♂️", "🥶", "🤝", "🎉"
+]);
 
 /**
  * Kullanıcı girdilerini temizler (XSS & UI Bozulma Koruması)
@@ -323,6 +325,13 @@ export const multiplayerStore = {
     const room = rooms.get(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
+    // Yetkili oyuncu doğrulaması
+    const isHost = room.host.id === cleanPlayerId;
+    const isGuest = Boolean(room.guest && room.guest.id === cleanPlayerId);
+    if (!isHost && !isGuest) {
+      return { error: "Geçersiz veya yetkisiz oyuncu kimliği" };
+    }
+
     // Önce durum senkronizasyonu yap (Süre dolduysa durumu günceller)
     this.syncRoomState(room);
 
@@ -332,13 +341,19 @@ export const multiplayerStore = {
     const targetPlayer = PLAYERS.find((p) => p.id === targetPlayerId);
     const guessedPlayer = PLAYERS.find((p) => p.id === cleanGuessedId);
 
-    const playerName =
-      room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Rakip";
+    const playerName = isHost ? room.host.name : (room.guest?.name || "Rakip");
 
-    // Büyük/küçük harf duyarsız ve boşluksuz ID karşılaştırması
+    // Güçlendirilmiş ve esnek eşleşme:
+    // 1. Doğrudan ID eşleşmesi
+    // 2. Oyuncu adı eşleşmesi
+    // 3. Varsa tam isim (fullName) eşleşmesi
     const isCorrect =
       Boolean(cleanGuessedId && targetPlayerId) &&
-      cleanGuessedId.trim().toLowerCase() === targetPlayerId.trim().toLowerCase();
+      (cleanGuessedId.trim().toLowerCase() === targetPlayerId.trim().toLowerCase() ||
+        (Boolean(guessedPlayer && targetPlayer) &&
+          guessedPlayer!.name.trim().toLowerCase() === targetPlayer!.name.trim().toLowerCase()) ||
+        (Boolean(guessedPlayer && targetPlayer && guessedPlayer!.fullName) &&
+          guessedPlayer!.fullName!.trim().toLowerCase() === targetPlayer!.name.trim().toLowerCase()));
 
     const guessedPlayerName = guessedPlayer?.name || cleanGuessedId;
 
@@ -356,7 +371,7 @@ export const multiplayerStore = {
     }
     room.recentGuesses = [guessEvent, ...room.recentGuesses].slice(0, 10);
 
-    if (room.host.id === cleanPlayerId) {
+    if (isHost) {
       room.host.lastGuess = guessedPlayerName;
       room.host.isCorrect = isCorrect;
     } else if (room.guest) {
@@ -389,15 +404,18 @@ export const multiplayerStore = {
     const room = rooms.get(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
+    const isHost = room.host.id === cleanPlayerId;
+    const isGuest = Boolean(room.guest && room.guest.id === cleanPlayerId);
+    if (!isHost && !isGuest) {
+      return { error: "Geçersiz veya yetkisiz oyuncu kimliği" };
+    }
+
     this.syncRoomState(room);
     if (room.status !== "PLAYING") return { error: "Oyun şu anda aktif değil" };
 
-    const forfeiterName =
-      room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Oyuncu";
-    const opponentId =
-      room.host.id === cleanPlayerId ? room.guest?.id || null : room.host.id;
-    const opponentName =
-      room.host.id === cleanPlayerId ? room.guest?.name || "Rakip" : room.host.name;
+    const forfeiterName = isHost ? room.host.name : (room.guest?.name || "Oyuncu");
+    const opponentId = isHost ? (room.guest?.id || null) : room.host.id;
+    const opponentName = isHost ? (room.guest?.name || "Rakip") : room.host.name;
 
     const targetPlayerId = room.playerIds[room.currentRoundIndex];
     const targetPlayer = PLAYERS.find((p) => p.id === targetPlayerId);
@@ -420,6 +438,13 @@ export const multiplayerStore = {
 
     const room = rooms.get(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
+
+    const isHost = room.host.id === cleanPlayerId;
+    const isGuest = Boolean(room.guest && room.guest.id === cleanPlayerId);
+    if (!isHost && !isGuest) {
+      return { error: "Geçersiz veya yetkisiz oyuncu kimliği" };
+    }
+
     if (room.status !== "PLAYING") return { error: "Şu an pas geçilemez" };
 
     const targetPlayerId = room.playerIds[room.currentRoundIndex];
@@ -430,8 +455,7 @@ export const multiplayerStore = {
       room.revealedClubCount += 1;
     }
 
-    const playerName =
-      room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Rakip";
+    const playerName = isHost ? room.host.name : (room.guest?.name || "Rakip");
 
     room.actionNotice = `${playerName} pas geçti (+1 Kulüp Açıldı)`;
     return { room };
@@ -446,6 +470,10 @@ export const multiplayerStore = {
 
     const room = rooms.get(cleanCode);
     if (!room) return null;
+
+    const isHost = room.host.id === cleanPlayerId;
+    const isGuest = Boolean(room.guest && room.guest.id === cleanPlayerId);
+    if (!isHost && !isGuest) return null;
 
     if (!room.rematchVotes.includes(cleanPlayerId)) {
       room.rematchVotes.push(cleanPlayerId);
@@ -468,10 +496,11 @@ export const multiplayerStore = {
         room.guest.isCorrect = undefined;
       }
       room.status = "PLAYING";
+      room.transitionAt = undefined;
       room.roundStartTime = Date.now();
       room.actionNotice = "🔥 RÖVANŞ BAŞLADI! 1. Tur!";
     } else {
-      const who = room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Rakip";
+      const who = isHost ? room.host.name : (room.guest?.name || "Rakip");
       room.actionNotice = `${who} rövanş istiyor! (1/2)`;
     }
 
@@ -489,8 +518,13 @@ export const multiplayerStore = {
     const room = rooms.get(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
-    const senderName =
-      room.host.id === cleanPlayerId ? room.host.name : room.guest?.name || "Rakip";
+    const isHost = room.host.id === cleanPlayerId;
+    const isGuest = Boolean(room.guest && room.guest.id === cleanPlayerId);
+    if (!isHost && !isGuest) {
+      return { error: "Geçersiz veya yetkisiz oyuncu kimliği" };
+    }
+
+    const senderName = isHost ? room.host.name : (room.guest?.name || "Rakip");
 
     const reaction = {
       id: "r_" + Math.random().toString(36).substring(2, 9),

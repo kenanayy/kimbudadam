@@ -29,7 +29,10 @@ export async function GET(req: NextRequest) {
 
   // 🛡️ Hile koruması: İstemciye sadece anonimleştirilmiş güvenli oda nesnesi gönderilir
   return NextResponse.json(
-    { room: multiplayerStore.sanitizeRoomForClient(room) },
+    {
+      room: multiplayerStore.sanitizeRoomForClient(room),
+      serverTime: Date.now(),
+    },
     { headers: NO_CACHE_HEADERS }
   );
 }
@@ -49,6 +52,7 @@ export async function POST(req: NextRequest) {
         {
           room: multiplayerStore.sanitizeRoomForClient(res.room),
           playerId: res.playerId,
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );
@@ -67,6 +71,7 @@ export async function POST(req: NextRequest) {
         {
           room: multiplayerStore.sanitizeRoomForClient(res.room),
           playerId: res.playerId,
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );
@@ -85,6 +90,7 @@ export async function POST(req: NextRequest) {
         {
           room: multiplayerStore.sanitizeRoomForClient(res.room),
           isCorrect: res.isCorrect,
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );
@@ -102,6 +108,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           room: multiplayerStore.sanitizeRoomForClient(res.room),
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );
@@ -119,6 +126,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           room: multiplayerStore.sanitizeRoomForClient(res.room),
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );
@@ -136,6 +144,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           room: multiplayerStore.sanitizeRoomForClient(room),
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );
@@ -153,6 +162,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           room: multiplayerStore.sanitizeRoomForClient(res.room),
+          serverTime: Date.now(),
         },
         { headers: NO_CACHE_HEADERS }
       );

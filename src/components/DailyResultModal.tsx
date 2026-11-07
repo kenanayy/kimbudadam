@@ -77,22 +77,25 @@ export const DailyResultModal: React.FC<DailyResultModalProps> = ({
   const handleShare = async () => {
     const text = generateDailyShareText(result, stats);
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2500);
-        return;
-      } catch {}
-    }
-
-    // Mobil tarayıcı paylaşım alternatifi
-    if (navigator.share) {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
           title: "Kim Bu Adam? - Günün Futbolcusu",
           text,
         });
+        return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
       } catch {}
     }
   };

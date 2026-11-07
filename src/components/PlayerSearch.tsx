@@ -201,6 +201,10 @@ export const PlayerSearch: React.FC<PlayerSearchProps> = ({
                 <button
                   key={player.id}
                   type="button"
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    handleSelect(player);
+                  }}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     handleSelect(player);

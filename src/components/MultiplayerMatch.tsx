@@ -21,6 +21,7 @@ import {
   Zap,
   Swords,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 interface MultiplayerMatchProps {
@@ -48,6 +49,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
 }) => {
   const [room, setRoom] = useState<MultiplayerRoom>(initialRoom);
   const [timeLeft, setTimeLeft] = useState<number>(45);
+  const [serverTimeOffset, setServerTimeOffset] = useState<number>(0);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [rematchRequested, setRematchRequested] = useState<boolean>(false);
   const [guessError, setGuessError] = useState<string | null>(null);
@@ -94,6 +96,9 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
         );
         if (!res.ok) return;
         const data = await res.json();
+        if (data.serverTime) {
+          setServerTimeOffset(data.serverTime - Date.now());
+        }
         if (data.room) {
           setRoom(data.room);
           if (data.room.status === "PLAYING") {
@@ -156,20 +161,34 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
     return () => clearTimeout(timer);
   }, [room.latestReaction, myPlayerId]);
 
-  // Canlı geri sayım sayacı
+  // Canlı geri sayım sayacı (Sunucu zaman farkı senkronizasyonlu)
   useEffect(() => {
     if (room.status !== "PLAYING") return;
 
     const updateTimer = () => {
-      const elapsed = Math.floor((Date.now() - room.roundStartTime) / 1000);
+      const currentServerTime = Date.now() + serverTimeOffset;
+      const elapsed = Math.floor((currentServerTime - room.roundStartTime) / 1000);
       const remaining = Math.max(0, room.roundDurationSeconds - elapsed);
       setTimeLeft(remaining);
+
+      // Süre sıfırlandıysa sunucuyu hemen tetikle (senkronize et)
+      if (remaining <= 0) {
+        fetch(`/api/room?code=${room.code}&playerId=${myPlayerId}&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.room) setRoom(data.room);
+          })
+          .catch(() => {});
+      }
     };
 
     updateTimer();
     const timerInterval = setInterval(updateTimer, 500);
     return () => clearInterval(timerInterval);
-  }, [room.status, room.roundStartTime, room.roundDurationSeconds]);
+  }, [room.status, room.roundStartTime, room.roundDurationSeconds, room.code, myPlayerId, serverTimeOffset]);
 
   // Yeni tur başladığında yerel tahmin listesini temizle
   useEffect(() => {
@@ -265,8 +284,6 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
   // 3. PES ET (TURU RAKİBİNE DEVRET)
   const handleGiveUp = useCallback(async () => {
     if (room.status !== "PLAYING") return;
-    const confirm = window.confirm("Bu turdan pes etmek istiyor musun? Gol rakibine yazılacak.");
-    if (!confirm) return;
 
     soundManager.playGameOver();
 
@@ -370,6 +387,10 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
 
   const isRoundWinner = room.roundWinnerId === myPlayerId;
   const isOpponentWinner = room.roundWinnerId && room.roundWinnerId !== myPlayerId;
+
+  const transitionRemaining = room.transitionAt
+    ? Math.max(1, Math.ceil((room.transitionAt - (Date.now() + serverTimeOffset)) / 1000))
+    : 1;
 
   return (
     <div className="relative z-10 max-w-3xl mx-auto px-4 py-4 space-y-4 font-sans">
@@ -564,6 +585,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
               </p>
             </div>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-black animate-pulse">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
               <span>⚡ KULÜPLER AÇILIYOR...</span>
             </div>
           </div>
@@ -610,9 +632,10 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
               </div>
             )}
 
-            <p className="text-xs font-mono font-bold text-slate-400 pt-1">
-              Sıradaki tura geçiliyor...
-            </p>
+            <div className="flex items-center justify-center gap-2 pt-1 font-mono text-xs font-bold text-slate-500">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+              <span>Sıradaki tura geçiliyor ({transitionRemaining} sn)...</span>
+            </div>
           </div>
         )}
 
