@@ -134,7 +134,7 @@ export const PlayerSearch: React.FC<PlayerSearchProps> = ({
                 ? "Son tahmininizi yapın..."
                 : "Futbolcu ara..."
             }
-            className={`w-full pl-10 pr-20 py-2.5 bg-white dark:bg-slate-900 border rounded-xl text-slate-900 dark:text-slate-100 text-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs transition-all font-medium ${
+            className={`w-full pl-10 pr-20 py-2.5 bg-white dark:bg-slate-900 border rounded-xl text-slate-900 dark:text-slate-100 text-base sm:text-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs transition-all font-medium ${
               isLastChance && !disabled
                 ? "border-amber-400 placeholder-amber-700/70 dark:placeholder-amber-400/70 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 : "border-slate-300 dark:border-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"

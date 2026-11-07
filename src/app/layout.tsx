@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +19,18 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
   description: "Transfer ve kariyer geçmişinden futbolcuyu bulma oyunu",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#14532d" },
+    { media: "(prefers-color-scheme: dark)", color: "#071f12" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

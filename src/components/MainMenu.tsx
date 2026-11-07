@@ -325,7 +325,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
             {(
               [
                 { id: "ALL", label: "Tüm Oyuncular", count: counts.ALL, unit: "Yıldız" },
@@ -345,7 +345,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     soundManager.playClick();
                     setSelectedCategory(cat.id);
                   }}
-                  className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[110px] ${
+                  className={`p-2 sm:p-3.5 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[96px] sm:min-h-[110px] ${
                     isSelected
                       ? `${meta.selectedBg} ${meta.selectedBorder}`
                       : `bg-slate-50/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-800 text-slate-800 dark:text-slate-200 ${meta.hoverBorder} ${meta.hoverShadow}`
@@ -364,7 +364,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   {/* Üst Kısım: Tag + Nadirlik Yıldızları + Onay */}
                   <div className="flex items-center justify-between relative z-10 w-full">
                     <span
-                      className={`text-[9px] font-mono font-black tracking-wider uppercase px-2 py-0.5 rounded-md border ${
+                      className={`text-[8px] sm:text-[9px] font-mono font-black tracking-wider uppercase px-1.5 sm:px-2 py-0.5 rounded-md border ${
                         isSelected
                           ? "bg-white/10 text-white border-white/20"
                           : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
@@ -373,40 +373,40 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                       {meta.tag}
                     </span>
 
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] tracking-tighter">
+                    <div className="flex items-center gap-1 sm:gap-1.5">
+                      <span className="hidden sm:inline text-[10px] tracking-tighter">
                         {meta.stars}
                       </span>
                       {isSelected && (
-                        <div className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] shadow-xs">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] sm:text-[9px] shadow-xs">
+                          <Check className="w-2 h-2 sm:w-2.5 sm:h-2.5 stroke-[3]" />
                         </div>
                       )}
                     </div>
                   </div>
 
                   {/* Orta Kısım: İkon + İsim */}
-                  <div className="flex items-center gap-2.5 my-2 relative z-10">
+                  <div className="flex items-center gap-1.5 sm:gap-2.5 my-1 sm:my-2 relative z-10">
                     <div
-                      className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center transition-all duration-300 shadow-sm ${
+                      className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl shrink-0 flex items-center justify-center transition-all duration-300 shadow-sm ${
                         isSelected ? meta.iconBgSelected : meta.iconBgUnselected
                       }`}
                     >
                       <div className={`transition-transform duration-300 ${meta.iconAnimation}`}>
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </div>
                     </div>
 
                     <div className="min-w-0">
                       <h3
-                        className={`text-sm sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
+                        className={`text-xs sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
                           isSelected ? "text-white" : "text-slate-900 dark:text-white group-hover:text-black dark:group-hover:text-white"
                         }`}
                       >
                         {cat.label}
                       </h3>
                       <p
-                        className={`text-[10px] font-medium truncate mt-1 ${
+                        className={`hidden sm:block text-[10px] font-medium truncate mt-1 ${
                           isSelected ? "text-white/70" : "text-slate-500 dark:text-slate-400"
                         }`}
                       >
@@ -418,18 +418,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   {/* Alt Kısım: Rozet */}
                   <div className="relative z-10 pt-1 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
                     <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border transition-all ${
+                      className={`text-[8.5px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-lg border transition-all truncate ${
                         isSelected ? meta.badgeSelected : meta.badgeUnselected
                       }`}
                     >
                       {cat.count} {cat.unit}
                     </span>
                     <span
-                      className={`text-[10px] font-mono ${
+                      className={`hidden sm:inline text-[10px] font-mono ${
                         isSelected ? "text-white/60" : "text-slate-400"
                       }`}
                     >
-                      {isSelected ? "Aktif Paket" : "Paketi Seç ➔"}
+                      {isSelected ? "Aktif" : "Seç ➔"}
                     </span>
                   </div>
                 </button>
@@ -476,7 +476,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     soundManager.playClick();
                     setSelectedDifficulty(level);
                   }}
-                  className={`p-3 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[135px] ${
+                  className={`p-2.5 sm:p-3 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[105px] sm:min-h-[135px] ${
                     isSelected
                       ? `${meta.selectedBg} ${meta.selectedBorder} shadow-md`
                       : `bg-slate-50/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-800 ${meta.hoverBorder} ${meta.hoverShadow}`
@@ -493,16 +493,16 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   {/* Seçili İndikatörü */}
                   {isSelected && (
                     <div
-                      className={`absolute top-0 right-0 w-6 h-6 ${meta.accentColor} text-white flex items-center justify-center rounded-bl-lg text-[9px] font-bold shadow-2xs animate-in zoom-in-75 duration-150 z-10`}
+                      className={`absolute top-0 right-0 w-5 h-5 sm:w-6 sm:h-6 ${meta.accentColor} text-white flex items-center justify-center rounded-bl-lg text-[8px] sm:text-[9px] font-bold shadow-2xs animate-in zoom-in-75 duration-150 z-10`}
                     >
-                      <Check className="w-3 h-3 stroke-[3]" />
+                      <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[3]" />
                     </div>
                   )}
 
                   {/* Üst Kısım: Tier Adı */}
                   <div className="relative z-10 flex items-center justify-between w-full">
                     <span
-                      className={`text-[9px] font-mono font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                      className={`text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${
                         isSelected && isEfsane
                           ? "bg-purple-900/80 text-purple-200 border-purple-400/40"
                           : isSelected
@@ -515,9 +515,9 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   </div>
 
                   {/* Orta Kısım: İkon & Kademe Başlığı */}
-                  <div className="flex items-center gap-2 my-2 relative z-10">
+                  <div className="flex items-center gap-1.5 sm:gap-2 my-1 sm:my-2 relative z-10">
                     <div
-                      className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-all duration-300 shadow-2xs ${
+                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg shrink-0 flex items-center justify-center transition-all duration-300 shadow-2xs ${
                         isSelected && isEfsane
                           ? "bg-purple-800/80 text-amber-300"
                           : isSelected
@@ -526,13 +526,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                       } ${meta.iconColor}`}
                     >
                       <div className={`transition-transform duration-300 ${meta.iconAnimation}`}>
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </div>
                     </div>
 
                     <div className="min-w-0">
                       <div
-                        className={`text-sm sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
+                        className={`text-xs sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
                           isSelected && isEfsane
                             ? "text-white"
                             : isSelected
@@ -548,7 +548,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   {/* İstatistikler: Hak & Joker */}
                   <div className="relative z-10 flex items-center gap-1 flex-wrap">
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                      className={`px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-mono font-bold border ${
                         isSelected && isEfsane
                           ? "bg-purple-900/60 text-purple-200 border-purple-400/30"
                           : isSelected
@@ -559,7 +559,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                       {cfg.maxAttempts} Hak
                     </span>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                      className={`px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-mono font-bold border ${
                         isSelected && isEfsane
                           ? "bg-purple-950 text-amber-300 border-amber-400/30"
                           : isSelected
@@ -579,7 +579,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
 
                   {/* Alt Kısım: Çarpan & Özellik */}
                   <div
-                    className={`relative z-10 text-[10px] font-mono mt-2 pt-1 border-t truncate ${
+                    className={`relative z-10 text-[8.5px] sm:text-[10px] font-mono mt-1.5 sm:mt-2 pt-1 border-t truncate ${
                       isSelected && isEfsane
                         ? "border-purple-800 text-amber-300 font-bold"
                         : isSelected

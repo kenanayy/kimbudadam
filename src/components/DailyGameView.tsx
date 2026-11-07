@@ -402,12 +402,22 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
           {/* 1. Üst Skor Tablosu & Hak Göstergesi */}
           <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3.5 min-w-0">
-              <PlayerAvatar
-                player={targetPlayer}
-                size="lg"
-                isMystery={gameState === "PLAYING"}
-                className="shadow-md shrink-0"
-              />
+              <div className="shrink-0 sm:hidden">
+                <PlayerAvatar
+                  player={targetPlayer}
+                  size="md"
+                  isMystery={gameState === "PLAYING"}
+                  className="shadow-md"
+                />
+              </div>
+              <div className="shrink-0 hidden sm:block">
+                <PlayerAvatar
+                  player={targetPlayer}
+                  size="lg"
+                  isMystery={gameState === "PLAYING"}
+                  className="shadow-md"
+                />
+              </div>
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">

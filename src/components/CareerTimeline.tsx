@@ -282,10 +282,10 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({
                 className="flex items-start shrink-0"
               >
                 {/* Kulüp Kartı Sütunu */}
-                <div className="flex flex-col items-center w-24 sm:w-28 md:w-32 group">
+                <div className="flex flex-col items-center w-20 sm:w-28 md:w-32 group">
                   {/* KULÜP KUTUCUĞU (Özel Kart Tasarımı) */}
                   <div
-                    className={`relative w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-2xl sm:rounded-3xl p-2 sm:p-2.5 flex items-center justify-center transition-all duration-300 select-none ${
+                    className={`relative w-19 h-19 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2.5 flex items-center justify-center transition-all duration-300 select-none ${
                       isRevealed
                         ? isLatest
                           ? "bg-gradient-to-b from-white dark:from-slate-900 via-emerald-50/40 dark:via-emerald-950/40 to-white dark:to-slate-900 border-2 border-emerald-500 ring-4 ring-emerald-500/25 shadow-lg shadow-emerald-500/20 animate-neon-pulse animate-club-reveal scale-[1.03]"
@@ -305,7 +305,7 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({
                           <ClubLogo
                             clubName={item.club}
                             size="xl"
-                            className="w-13 h-13 sm:w-15 sm:h-15 md:w-16 md:h-16 drop-shadow-xs transition-transform duration-200 group-hover:scale-105"
+                            className="w-11 h-11 sm:w-15 sm:h-15 md:w-16 md:h-16 drop-shadow-xs transition-transform duration-200 group-hover:scale-105"
                           />
                         </div>
 
@@ -339,22 +339,22 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({
                           </span>
                         </div>
 
-                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-100/80 border border-emerald-300/80 flex flex-col items-center justify-center text-emerald-700 shadow-inner mt-1">
-                          <Lock className="w-4 h-4 text-emerald-600 animate-pulse stroke-[2.2]" />
-                          <span className="font-mono font-black text-sm text-emerald-800 mt-0.5">?</span>
+                        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-emerald-100/80 border border-emerald-300/80 flex flex-col items-center justify-center text-emerald-700 shadow-inner mt-1">
+                          <Lock className="w-3.5 h-3.5 text-emerald-600 animate-pulse stroke-[2.2]" />
+                          <span className="font-mono font-black text-xs sm:text-sm text-emerald-800 mt-0.5">?</span>
                         </div>
-                        <span className="text-[7.5px] font-mono font-bold text-emerald-700 uppercase tracking-widest mt-1">
+                        <span className="text-[7px] sm:text-[7.5px] font-mono font-bold text-emerald-700 uppercase tracking-widest mt-0.5 sm:mt-1">
                           Açılacak
                         </span>
                       </div>
                     ) : (
                       /* DİĞER KİLİTLİ KULÜPLER (Gizemli Kasa & Taktik Görünüm) */
                       <div className="flex flex-col items-center justify-center text-center relative z-10">
-                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-300/70 dark:border-slate-700 flex flex-col items-center justify-center shadow-2xs backdrop-blur-xs">
-                          <Lock className="w-3 h-3 text-slate-400 dark:text-slate-500 mb-0.5" />
-                          <span className="font-mono font-black text-sm text-slate-500 dark:text-slate-400 leading-none">?</span>
+                        <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-300/70 dark:border-slate-700 flex flex-col items-center justify-center shadow-2xs backdrop-blur-xs">
+                          <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-slate-500 mb-0.5" />
+                          <span className="font-mono font-black text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-none">?</span>
                         </div>
-                        <span className="text-[7.5px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
+                        <span className="text-[7px] sm:text-[7.5px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 sm:mt-1">
                           Kilitli
                         </span>
                       </div>
@@ -362,10 +362,10 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({
                   </div>
 
                   {/* KUTUNUN ALTINDAKİ İSİM VE BİLGİLER */}
-                  <div className="mt-2 text-center w-full px-1">
+                  <div className="mt-1.5 sm:mt-2 text-center w-full px-0.5 sm:px-1">
                     {/* Kulüp İsmi veya Kilitli Sırası */}
                     <div
-                      className={`text-xs sm:text-sm font-black leading-snug text-center break-words line-clamp-2 min-h-[2.1rem] sm:min-h-[2.4rem] flex items-center justify-center transition-colors ${
+                      className={`text-[11px] sm:text-sm font-black leading-tight text-center break-words line-clamp-2 min-h-[1.8rem] sm:min-h-[2.4rem] flex items-center justify-center transition-colors ${
                         isRevealed
                           ? "text-slate-950 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400"
                           : isNextUp
@@ -379,18 +379,18 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({
 
                     {/* Transfer Yılları */}
                     {isRevealed ? (
-                      <div className="text-[10px] sm:text-[11px] font-mono font-black mt-1 px-2.5 py-0.5 rounded-lg inline-flex items-center justify-center whitespace-nowrap bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-200 border border-emerald-300/80 dark:border-emerald-800 shadow-2xs">
+                      <div className="text-[9px] sm:text-[11px] font-mono font-black mt-0.5 sm:mt-1 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-lg inline-flex items-center justify-center whitespace-nowrap bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-200 border border-emerald-300/80 dark:border-emerald-800 shadow-2xs">
                         {item.years}
                       </div>
                     ) : (
-                      <div className="text-[9.5px] font-mono font-bold mt-1 px-2 py-0.5 rounded-md inline-flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-100/70 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+                      <div className="text-[8.5px] sm:text-[9.5px] font-mono font-bold mt-0.5 sm:mt-1 px-1.5 py-0.5 rounded-md inline-flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-100/70 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
                         ???? - ????
                       </div>
                     )}
 
                     {/* Lig Bilgisi (Açıksa) */}
                     {(showLeague || isGameOver) && item.league && isRevealed && (
-                      <div className="text-[9.5px] sm:text-[10.5px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                      <div className="text-[8.5px] sm:text-[10.5px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
                         {item.league}
                       </div>
                     )}
@@ -399,16 +399,16 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({
 
                 {/* 3. TRANSFER OKU */}
                 {index < totalClubs - 1 && (
-                  <div className="h-22 sm:h-26 md:h-28 flex items-center justify-center px-1 sm:px-2 shrink-0">
+                  <div className="h-19 sm:h-26 md:h-28 flex items-center justify-center px-0.5 sm:px-2 shrink-0">
                     <div
                       className={`rounded-full flex items-center justify-center transition-all ${
                         index < revealedCount - 1 || isGameOver
-                          ? "w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-emerald-100 dark:from-emerald-950/70 to-teal-100 dark:to-teal-950/70 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-300 dark:border-emerald-700 shadow-2xs ring-2 ring-emerald-500/15"
-                          : "w-6 h-6 sm:w-7 sm:h-7 bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800"
+                          ? "w-5 h-5 sm:w-8 sm:h-8 bg-gradient-to-r from-emerald-100 dark:from-emerald-950/70 to-teal-100 dark:to-teal-950/70 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-300 dark:border-emerald-700 shadow-2xs ring-2 ring-emerald-500/15"
+                          : "w-4.5 h-4.5 sm:w-7 sm:h-7 bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800"
                       }`}
                     >
                       <ArrowRight
-                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                        className={`w-2.5 h-2.5 sm:w-4 sm:h-4 ${
                           index < revealedCount - 1 || isGameOver
                             ? "stroke-[3] text-emerald-700 dark:text-emerald-400"
                             : "stroke-[2] text-slate-400 dark:text-slate-600"

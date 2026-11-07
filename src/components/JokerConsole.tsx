@@ -44,21 +44,21 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
   if (totalAllowed === 0) return null;
 
   return (
-    <div className="w-full bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3 sm:p-3.5 space-y-2.5 transition-all">
+    <div className="w-full bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 space-y-2 sm:space-y-2.5 transition-all">
       {/* Üst Başlık & Bilgi */}
-      <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 text-[11px] font-mono font-bold uppercase tracking-wider">
+      <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider">
         <span className="flex items-center gap-1.5 font-sans font-black text-slate-900 dark:text-white">
           <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
           <span>Taktiksel Jokerler</span>
         </span>
-        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700 shadow-2xs">
+        <span className="text-[9px] sm:text-[10px] font-bold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 sm:px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700 shadow-2xs">
           {totalAllowed} Joker Mevcut • {difficulty === "KOLAY" ? "Kolay" : difficulty === "ORTA" ? "Orta" : "Zor"} Mod
         </span>
       </div>
 
       {/* Dinamik Joker Butonları Grid'i */}
       <div
-        className={`grid gap-2 ${
+        className={`grid gap-1.5 sm:gap-2 ${
           totalAllowed === 3
             ? "grid-cols-3"
             : totalAllowed === 2
@@ -72,7 +72,7 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
             type="button"
             onClick={onUseExtraClub}
             disabled={disabled || extraClubUsed || !canRevealClub}
-            className={`relative group flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+            className={`relative group flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border text-center transition-all cursor-pointer ${
               extraClubUsed
                 ? "bg-slate-100/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
                 : !canRevealClub
@@ -87,17 +87,17 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
                 : "Hak harcamadan kariyerdeki bir sonraki kulübü aç"
             }
           >
-            <div className="flex items-center gap-1 mb-1">
+            <div className="flex items-center gap-1 mb-0.5 sm:mb-1">
               {extraClubUsed ? (
                 <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
               ) : (
                 <Unlock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
               )}
-              <span className="text-xs font-black">
+              <span className="text-[11px] sm:text-xs font-black">
                 {extraClubUsed ? "Kulüp Açık" : "+1 Kulüp"}
               </span>
             </div>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium hidden sm:block truncate w-full">
+            <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium hidden sm:block truncate w-full">
               {extraClubUsed ? "Kullanıldı" : "Hak harcamaz"}
             </span>
           </button>
@@ -109,7 +109,7 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
             type="button"
             onClick={onUseJerseyNumber}
             disabled={disabled || jerseyUsed}
-            className={`relative group flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+            className={`relative group flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border text-center transition-all cursor-pointer ${
               jerseyUsed
                 ? "bg-indigo-50/80 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800 text-indigo-950 dark:text-indigo-200 shadow-2xs"
                 : "bg-indigo-50/90 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border-indigo-300 dark:border-indigo-700/60 text-indigo-950 dark:text-indigo-100 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 active:translate-y-0"
@@ -120,13 +120,13 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
                 : "Futbolcunun en bilinen sırt numarasını öğren"
             }
           >
-            <div className="flex items-center gap-1 mb-1">
+            <div className="flex items-center gap-1 mb-0.5 sm:mb-1">
               <Shirt className={`w-3.5 h-3.5 ${jerseyUsed ? "text-indigo-600 dark:text-indigo-400 fill-indigo-100 dark:fill-indigo-900/50" : "text-indigo-600 dark:text-indigo-400 group-hover:scale-110"} transition-transform`} />
-              <span className="text-xs font-black">
+              <span className="text-[11px] sm:text-xs font-black">
                 {jerseyUsed ? `#${revealedJerseyNumber}` : "Forma No"}
               </span>
             </div>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium hidden sm:block truncate w-full">
+            <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium hidden sm:block truncate w-full">
               {jerseyUsed ? "İkonik Sırt No" : "Numarayı Gör"}
             </span>
           </button>
@@ -138,7 +138,7 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
             type="button"
             onClick={onUseTrophyHint}
             disabled={disabled || trophyUsed}
-            className={`relative group flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+            className={`relative group flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border text-center transition-all cursor-pointer ${
               trophyUsed
                 ? "bg-amber-50/80 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-200 shadow-2xs"
                 : "bg-amber-50/90 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 active:translate-y-0"
@@ -149,13 +149,13 @@ export const JokerConsole: React.FC<JokerConsoleProps> = React.memo(({
                 : "Kariyerindeki en büyük başarı veya kupa ipucunu aç"
             }
           >
-            <div className="flex items-center gap-1 mb-1">
+            <div className="flex items-center gap-1 mb-0.5 sm:mb-1">
               <Trophy className={`w-3.5 h-3.5 ${trophyUsed ? "text-amber-600 dark:text-amber-400 fill-amber-200 dark:fill-amber-900/50" : "text-amber-600 dark:text-amber-400 group-hover:scale-110"} transition-transform`} />
-              <span className="text-xs font-black">
+              <span className="text-[11px] sm:text-xs font-black">
                 {trophyUsed ? "Kupa Açık" : "Kupa İpucu"}
               </span>
             </div>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium hidden sm:block truncate w-full">
+            <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium hidden sm:block truncate w-full">
               {trophyUsed ? "Görüntüleniyor" : "Büyük Başarı"}
             </span>
           </button>
