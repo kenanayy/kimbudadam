@@ -208,7 +208,7 @@ export function formatTimeRemaining(ms: number): string {
   return `${pad(hours)}s ${pad(minutes)}dk ${pad(seconds)}sn`;
 }
 
-// 🟩 Spoiler İçermeyen (Wordle Usulü) Paylaşım Metni Oluşturucu
+// 🟩 Spoiler İçermeyen Emoji Paylaşım Metni Oluşturucu
 export function generateDailyShareText(
   result: DailyGameResult,
   stats: DailyStats,

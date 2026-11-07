@@ -166,7 +166,7 @@ export const DailyResultModal: React.FC<DailyResultModalProps> = ({
           </div>
         </div>
 
-        {/* 📊 GÜNLÜK İSTATİSTİKLER (Wordle Usulü) */}
+        {/* 📊 GÜNLÜK İSTATİSTİKLER */}
         <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 mb-4 text-left">
           <div className="flex items-center justify-between text-xs font-mono font-black text-slate-400 uppercase tracking-wider border-b border-slate-800 pb-1.5">
             <div className="flex items-center gap-1.5 text-slate-300">
@@ -257,7 +257,7 @@ export const DailyResultModal: React.FC<DailyResultModalProps> = ({
             <>
               <Share2 className="w-4 h-4 stroke-[2.5]" />
               <span className="tracking-wide">
-                SKORUNU WORDLE USULÜ PAYLAŞ 📋
+                GÜNÜN SKORUNU PAYLAŞ 📋
               </span>
             </>
           )}

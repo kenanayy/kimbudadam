@@ -63,6 +63,28 @@ export const GuessHistory: React.FC<GuessHistoryProps> = React.memo(({
             );
           }
 
+          // 1.1 PES ETME DURUMU
+          if (guess.player.id.startsWith("pes-")) {
+            return (
+              <div
+                key={idx}
+                className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl border border-rose-200/90 bg-rose-50/70 text-xs shadow-2xs"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-mono text-[10px] font-bold">
+                    🏳️
+                  </div>
+                  <span className="text-xs text-rose-800 font-semibold italic">
+                    Pes Edildi (Cevap Açıldı)
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-rose-400">
+                  #{guess.attemptNumber}
+                </span>
+              </div>
+            );
+          }
+
           // 2. DOĞRU BİLİNEN TAHMİN
           if (guess.isCorrect) {
             return (

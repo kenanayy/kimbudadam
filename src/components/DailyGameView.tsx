@@ -253,6 +253,62 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
     }
   }, [targetPlayer, gameState, dailyInfo, guesses, revealedClubCount]);
 
+  // Pes Et / Turu Sonlandır & Cevabı Gör
+  const handleGiveUp = useCallback(() => {
+    if (!targetPlayer || gameState !== "PLAYING" || !dailyInfo) return;
+
+    soundManager.playGameOver();
+    setGameState("LOST");
+    setRevealedClubCount(targetPlayer.career.length);
+
+    const attemptNumber = guesses.length + 1;
+    const dummyPlayer: Player = {
+      id: `pes-${attemptNumber}`,
+      name: "Pes Edildi",
+      nationality: targetPlayer.nationality,
+      flag: "🏳️",
+      position: targetPlayer.position,
+      birthYear: targetPlayer.birthYear,
+      currentStatus: "Cevap Açıldı",
+      career: [],
+    };
+
+    const nextGuesses: GuessResult[] = [
+      ...guesses,
+      {
+        player: dummyPlayer,
+        isCorrect: false,
+        attemptNumber,
+      },
+    ];
+
+    setGuesses(nextGuesses);
+
+    const resultObj: DailyGameResult = {
+      dateStr: dailyInfo.dateStr,
+      dayNumber: dailyInfo.dayNumber,
+      targetPlayerId: targetPlayer.id,
+      isWon: false,
+      attemptsUsed: Math.min(nextGuesses.length, DAILY_MAX_ATTEMPTS),
+      maxAttempts: DAILY_MAX_ATTEMPTS,
+      guesses: nextGuesses.map((g) => ({
+        playerId: g.player.id,
+        playerName: g.player.name,
+        isCorrect: g.isCorrect,
+        attemptNumber: g.attemptNumber,
+      })),
+      revealedClubCount: targetPlayer.career.length,
+      completedAt: Date.now(),
+    };
+
+    saveDailyStorage(resultObj);
+    const updatedStats = recordDailyGame(false, DAILY_MAX_ATTEMPTS, dailyInfo.dateStr);
+    setSavedResult(resultObj);
+    setStats(updatedStats);
+
+    setTimeout(() => setIsResultModalOpen(true), 600);
+  }, [targetPlayer, gameState, dailyInfo, guesses]);
+
   if (!dailyInfo || !targetPlayer) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-400 font-mono text-sm">
@@ -333,8 +389,8 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 shadow-2xs">
-                    <Calendar className="w-3 h-3 text-emerald-400" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 shadow-2xs">
+                    <Calendar className="w-3 h-3 text-emerald-700 stroke-[2.5]" />
                     <span>GÜN #{dailyInfo.dayNumber}</span>
                   </span>
                   <span className="text-[11px] font-mono text-slate-500 font-bold">
@@ -360,39 +416,50 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
               </div>
             </div>
 
-            {/* Hak Kutucukları */}
+            {/* Hak Kutucukları & Skor Kartı Butonu */}
             <div className="flex flex-col items-end gap-2 shrink-0">
               <div className="flex items-center gap-1 bg-slate-100/90 px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
                 <span className="text-[10px] font-mono font-bold text-slate-600 mr-1 hidden sm:inline">
                   Hak:
                 </span>
-                {Array.from({ length: DAILY_MAX_ATTEMPTS }).map((_, i) => {
-                  const isUsed = i < guesses.length;
-                  const isSuccess = isUsed && guesses[i].isCorrect;
-                  const isFail = isUsed && !guesses[i].isCorrect;
+                {isLastChance ? (
+                  <div className="flex items-center gap-1 px-0.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shadow-2xs" />
+                    <span className="text-[10px] font-mono font-black text-amber-700 tracking-wider">
+                      SON HAK
+                    </span>
+                  </div>
+                ) : (
+                  Array.from({ length: DAILY_MAX_ATTEMPTS }).map((_, i) => {
+                    const isUsed = i < guesses.length;
+                    const isSuccess = isUsed && guesses[i].isCorrect;
+                    const isFail = isUsed && !guesses[i].isCorrect;
+                    const isCurrent = i === guesses.length && gameState === "PLAYING";
 
-                  return (
-                    <div
-                      key={i}
-                      className={`h-2.5 rounded-full transition-all duration-200 ${
-                        isSuccess
-                          ? "w-4 bg-emerald-500 shadow-xs shadow-emerald-500/50"
-                          : isFail
-                          ? "w-2.5 bg-rose-500"
-                          : i === guesses.length
-                          ? "w-4 bg-amber-500 shadow-xs shadow-amber-500/50 animate-pulse"
-                          : "w-2.5 bg-slate-300"
-                      }`}
-                    />
-                  );
-                })}
+                    return (
+                      <div
+                        key={i}
+                        className={`h-2.5 rounded-full transition-all duration-200 ${
+                          isSuccess
+                            ? "w-4 bg-emerald-500 shadow-xs shadow-emerald-500/50"
+                            : isFail
+                            ? "w-2.5 bg-rose-500"
+                            : isCurrent
+                            ? "w-4 bg-amber-500 shadow-xs shadow-amber-500/50 animate-pulse"
+                            : "w-2 bg-slate-300"
+                        }`}
+                        title={`${i + 1}. Hak`}
+                      />
+                    );
+                  })
+                )}
               </div>
 
               {gameState !== "PLAYING" && savedResult && (
                 <button
                   type="button"
                   onClick={() => setIsResultModalOpen(true)}
-                  className="py-1 px-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-xs font-mono font-black flex items-center gap-1 cursor-pointer"
+                  className="py-1 px-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-xs font-mono font-black flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
                 >
                   <Share2 className="w-3 h-3 text-emerald-700" />
                   <span>Skor Kartı</span>
@@ -409,15 +476,7 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
             showLeague={true}
           />
 
-          {/* 3. İpucu Kartı (Tahmin sayısına göre ipuçları açılır) */}
-          <HintCard
-            player={targetPlayer}
-            attemptCount={guesses.length}
-            isGameOver={gameState !== "PLAYING"}
-            difficulty="ORTA"
-          />
-
-          {/* 4. Arama Çubuğu veya Oyun Bitti Bildirimi */}
+          {/* 3. Arama Çubuğu veya Oyun Bitti Bildirimi (Kariyerin hemen altında - klasik mod ergonomisi) */}
           {gameState === "PLAYING" ? (
             <PlayerSearch
               allPlayers={PLAYERS}
@@ -425,57 +484,76 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
               disabled={gameState !== "PLAYING"}
               onGuess={handleGuess}
               onSkip={handleSkip}
-              onGiveUp={() => {}}
+              onGiveUp={handleGiveUp}
               canSkip={revealedClubCount < targetPlayer.career.length}
               isLastChance={isLastChance}
             />
           ) : (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center shrink-0">
-                  <Trophy className="w-5 h-5 fill-amber-400" />
-                </div>
-                <div>
-                  <div className="text-sm font-black text-white">
-                    {gameState === "WON"
-                      ? "Günün Futbolcusu Başarıyla Çözüldü!"
-                      : "Günün Futbolcusu Sona Erdi!"}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-3.5 shadow-xl">
+              <div className="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+                <PlayerAvatar player={targetPlayer} size="md" isMystery={false} className="shadow-lg shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                        gameState === "WON"
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                          : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                      }`}
+                    >
+                      {gameState === "WON" ? "✓ Doğru Tahmin!" : "✗ Haklar Tükendi"}
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono">
+                      {targetPlayer.career.length} Kulüp
+                    </span>
                   </div>
-                  <div className="text-xs text-slate-400 font-mono">
-                    Yarın saat 00:00&apos;da yeni futbolcu gelecek.
-                  </div>
+                  <h3 className="text-base sm:text-lg font-black text-white truncate mt-0.5">
+                    {targetPlayer.name}
+                  </h3>
+                  <p className="text-xs text-slate-300 font-medium truncate">
+                    {targetPlayer.position} • {targetPlayer.nationality} {targetPlayer.flag} ({targetPlayer.currentStatus})
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
                 <button
                   type="button"
                   onClick={() => setIsResultModalOpen(true)}
-                  className="py-2 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
+                  className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <Share2 className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Skorunu Paylaş</span>
                 </button>
                 <button
                   type="button"
                   onClick={onPlayRegularGame}
-                  className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-slate-700"
+                  className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-slate-700"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Sınırsız Mod</span>
+                  <span className="hidden sm:inline">Sınırsız Mod</span>
                 </button>
               </div>
             </div>
           )}
+        </section>
 
-          {/* 5. Tahmin Geçmişi */}
+        {/* 4. İpuçları & Tahmin Geçmişi (Alt Panel - Klasik mod ile tam uyumlu) */}
+        <div className="relative z-10 space-y-4">
+          <HintCard
+            player={targetPlayer}
+            attemptCount={guesses.length}
+            isGameOver={gameState !== "PLAYING"}
+            difficulty="ORTA"
+          />
+
           <GuessHistory
             guesses={guesses}
             maxAttempts={DAILY_MAX_ATTEMPTS}
             targetPlayer={targetPlayer}
             difficulty="ORTA"
           />
-        </section>
+        </div>
       </div>
 
       {/* Günlük Sonuç Modalı */}
