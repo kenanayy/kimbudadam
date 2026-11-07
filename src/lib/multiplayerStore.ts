@@ -1,5 +1,6 @@
-import { MultiplayerRoom, MultiplayerPlayer, RoomStatus } from "@/types/multiplayer";
+import { MultiplayerRoom, MultiplayerPlayer } from "@/types/multiplayer";
 import { PLAYERS } from "@/data/players";
+import { getStore } from "@netlify/blobs";
 
 // Next.js dev reloads ve serverless process'lerde kaybolmaması için globalThis kullanımı
 declare global {
@@ -11,7 +12,50 @@ if (!globalThis.__multiplayer_rooms) {
   globalThis.__multiplayer_rooms = new Map<string, MultiplayerRoom>();
 }
 
-const rooms = globalThis.__multiplayer_rooms;
+const memoryRooms = globalThis.__multiplayer_rooms;
+
+/**
+ * Netlify Blobs Kalıcı Deposu (Tüm sunucu ve lambdalar arasında paylaşımlı)
+ * Netlify ortamında otomatik çalışır, yerel geliştirmede sessizce RAM'e fallback yapar.
+ */
+function getBlobStore() {
+  try {
+    return getStore("multiplayer_rooms");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Odayı önce Netlify Blobs'tan, bulunamazsa yerel RAM'den getirir
+ */
+async function fetchRoom(code: string): Promise<MultiplayerRoom | null> {
+  const cleanCode = sanitizeInput(code, 6).toUpperCase();
+  const store = getBlobStore();
+  if (store) {
+    try {
+      const room = await store.get(cleanCode, { type: "json" });
+      if (room && typeof room === "object" && "code" in room) {
+        memoryRooms.set(cleanCode, room as MultiplayerRoom);
+        return room as MultiplayerRoom;
+      }
+    } catch {}
+  }
+  return memoryRooms.get(cleanCode) || null;
+}
+
+/**
+ * Odayı hem yerel RAM'e hem de Netlify Blobs'a yazar (Kalıcı Senkronizasyon)
+ */
+async function persistRoom(room: MultiplayerRoom): Promise<void> {
+  memoryRooms.set(room.code, room);
+  const store = getBlobStore();
+  if (store) {
+    try {
+      await store.setJSON(room.code, room);
+    } catch {}
+  }
+}
 
 // Güvenlik & Bellek Sınırları
 const MAX_CONCURRENT_ROOMS = 500;
@@ -41,7 +85,7 @@ function pickRandomPlayerIds(count: number = 5): string[] {
 /**
  * Güvenli ve çakışmasız oda kodu üretir (Sonsuz özyineleme/recursion engellendi)
  */
-function generateRoomCode(): string {
+async function generateRoomCode(): Promise<string> {
   const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
   const numbers = "23456789";
 
@@ -53,7 +97,8 @@ function generateRoomCode(): string {
     for (let i = 0; i < 2; i++) {
       code += numbers.charAt(Math.floor(Math.random() * numbers.length));
     }
-    if (!rooms.has(code)) {
+    const existing = await fetchRoom(code);
+    if (!existing) {
       return code;
     }
   }
@@ -65,16 +110,23 @@ function generateRoomCode(): string {
 /**
  * Eski veya terk edilmiş odaları temizler (Bellek şişme koruması)
  */
-function cleanupExpiredRooms() {
+async function cleanupExpiredRooms() {
   const now = Date.now();
-  for (const [code, room] of rooms.entries()) {
-    // 1 saatten eski veya 15 dakikadır hareketsiz odaları sil
+  for (const [code, room] of memoryRooms.entries()) {
+    // 1 saatten eski veya beklemede kalıp 15 dakikadır hareketsiz odaları sil
     const isOld = now - room.createdAt > 60 * 60 * 1000;
-    const isInactive = now - (room.host.lastActive || room.createdAt) > 15 * 60 * 1000;
-    const isFinished = room.status === "GAME_OVER" && now - room.createdAt > 10 * 60 * 1000;
+    const isInactive =
+      (room.status === "WAITING" || room.status === "GAME_OVER") &&
+      now - (room.host.lastActive || room.createdAt) > 15 * 60 * 1000;
 
-    if (isOld || isInactive || isFinished) {
-      rooms.delete(code);
+    if (isOld || isInactive) {
+      memoryRooms.delete(code);
+      const store = getBlobStore();
+      if (store) {
+        try {
+          await store.delete(code);
+        } catch {}
+      }
     }
   }
 }
@@ -107,13 +159,13 @@ export const multiplayerStore = {
   /**
    * Yeni bir 1v1 oda oluşturur
    */
-  createRoom(
+  async createRoom(
     hostName: string,
     customCode?: string
-  ): { room: MultiplayerRoom; playerId: string } | { error: string } {
-    cleanupExpiredRooms();
+  ): Promise<{ room: MultiplayerRoom; playerId: string } | { error: string }> {
+    await cleanupExpiredRooms();
 
-    if (rooms.size >= MAX_CONCURRENT_ROOMS) {
+    if (memoryRooms.size >= MAX_CONCURRENT_ROOMS) {
       return { error: "Sunucu oda kapasitesi dolu. Lütfen birkaç dakika sonra tekrar deneyin." };
     }
 
@@ -124,11 +176,12 @@ export const multiplayerStore = {
 
     let code = cleanCustomCode;
     if (code) {
-      if (rooms.has(code)) {
+      const existing = await fetchRoom(code);
+      if (existing) {
         return { error: `"${code}" kodlu oda zaten mevcut! Başka bir kod seçin veya boş bırakın.` };
       }
     } else {
-      code = generateRoomCode();
+      code = await generateRoomCode();
     }
 
     const hostId = "p_" + Math.random().toString(36).substring(2, 9);
@@ -160,18 +213,18 @@ export const multiplayerStore = {
       createdAt: Date.now(),
     };
 
-    rooms.set(code, newRoom);
+    await persistRoom(newRoom);
     return { room: newRoom, playerId: hostId };
   },
 
   /**
    * Mevcut bir odaya katılır
    */
-  joinRoom(code: string, guestName: string): { room: MultiplayerRoom; playerId: string } | { error: string } {
+  async joinRoom(code: string, guestName: string): Promise<{ room: MultiplayerRoom; playerId: string } | { error: string }> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
     const cleanGuestName = sanitizeInput(guestName, 20) || "2. Oyuncu";
 
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
 
     if (!room) {
       return { error: "Oda bulunamadı! Lütfen kodu kontrol edin." };
@@ -196,6 +249,7 @@ export const multiplayerStore = {
     room.roundStartTime = Date.now();
     room.transitionAt = Date.now() + 2500; // 2.5 saniye sonra PLAYING durumuna geç
 
+    await persistRoom(room);
     return { room, playerId: guestId };
   },
 
@@ -204,8 +258,9 @@ export const multiplayerStore = {
    * Node süreci (container) dursa bile zaman damgaları (timestamp) ile
    * odayı her sorgulamada otomatik olarak doğru faza ilerletir.
    */
-  syncRoomState(room: MultiplayerRoom): MultiplayerRoom {
+  syncRoomState(room: MultiplayerRoom): boolean {
     const now = Date.now();
+    let changed = false;
 
     // 1. STARTING -> PLAYING geçişi (Maç başlangıcı sayacı)
     if (room.status === "STARTING") {
@@ -216,6 +271,7 @@ export const multiplayerStore = {
         room.revealedClubCount = 1;
         room.recentGuesses = [];
         room.actionNotice = "1. Tur Başladı! Kim Bu Adam?";
+        changed = true;
       }
     }
 
@@ -227,6 +283,7 @@ export const multiplayerStore = {
         room.roundWinnerId = null;
         room.transitionAt = now + 3500; // 3.5 saniye kutlama / açığa çıkma süresi
         room.actionNotice = "⏱️ Süre Doldu! Bu turda gol çıkmadı.";
+        changed = true;
       }
     }
 
@@ -247,6 +304,7 @@ export const multiplayerStore = {
           } else {
             room.actionNotice = `🤝 MAÇ SONUCU: DOSTLUK KAZANDI! BERABERE (${hostScore} - ${guestScore})`;
           }
+          changed = true;
         } else {
           // YENİ TUR BAŞLAT
           room.currentRoundIndex = nextRound;
@@ -265,29 +323,41 @@ export const multiplayerStore = {
             room.guest.lastGuess = undefined;
             room.guest.isCorrect = undefined;
           }
+          changed = true;
         }
       }
     }
 
-    return room;
+    return changed;
   },
 
   /**
    * Odanın durumunu sorgular (Heartbeat / Polling)
    */
-  getRoom(code: string, playerId?: string): MultiplayerRoom | null {
+  async getRoom(code: string, playerId?: string): Promise<MultiplayerRoom | null> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
     if (!room) return null;
+
+    let needsSave = false;
 
     // Oyuncunun aktiflik zamanını güncelle
     if (playerId) {
-      if (room.host.id === playerId) room.host.lastActive = Date.now();
-      if (room.guest?.id === playerId) room.guest.lastActive = Date.now();
+      if (room.host.id === playerId) {
+        room.host.lastActive = Date.now();
+        needsSave = true;
+      }
+      if (room.guest?.id === playerId) {
+        room.guest.lastActive = Date.now();
+        needsSave = true;
+      }
     }
 
     // Durum senkronizasyonu
-    this.syncRoomState(room);
+    const stateChanged = this.syncRoomState(room);
+    if (stateChanged || needsSave) {
+      await persistRoom(room);
+    }
 
     return room;
   },
@@ -295,9 +365,10 @@ export const multiplayerStore = {
   /**
    * Turu bitirir ve sıradaki tura veya maç sonuna hazırlar
    */
-  finishRound(code: string, winnerId: string | null, notice: string) {
-    const room = rooms.get(code);
-    if (!room || room.status !== "PLAYING") return;
+  async finishRound(code: string, winnerId: string | null, notice: string): Promise<MultiplayerRoom | null> {
+    const cleanCode = sanitizeInput(code, 6).toUpperCase();
+    const room = await fetchRoom(cleanCode);
+    if (!room || room.status !== "PLAYING") return null;
 
     room.status = "ROUND_OVER";
     room.roundWinnerId = winnerId;
@@ -308,21 +379,24 @@ export const multiplayerStore = {
       if (room.host.id === winnerId) room.host.score += 1;
       if (room.guest && room.guest.id === winnerId) room.guest.score += 1;
     }
+
+    await persistRoom(room);
+    return room;
   },
 
   /**
    * Tahmin yapar
    */
-  submitGuess(
+  async submitGuess(
     code: string,
     playerId: string,
     guessedPlayerId: string
-  ): { room: MultiplayerRoom; isCorrect: boolean } | { error: string } {
+  ): Promise<{ room: MultiplayerRoom; isCorrect: boolean } | { error: string }> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
     const cleanPlayerId = sanitizeInput(playerId, 40);
     const cleanGuessedId = sanitizeInput(guessedPlayerId, 60);
 
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
     // Yetkili oyuncu doğrulaması
@@ -381,7 +455,7 @@ export const multiplayerStore = {
 
     if (isCorrect) {
       // DOĞRU BİLDİ - GOL!
-      this.finishRound(
+      await this.finishRound(
         cleanCode,
         cleanPlayerId,
         `⚽ GOOOOL! ${playerName} doğru bildi: ${targetPlayer?.name || guessedPlayerName}`
@@ -390,6 +464,7 @@ export const multiplayerStore = {
     } else {
       // YANLIŞ TAHMİN
       room.actionNotice = `${playerName} yanlış tahmin yaptı: "${guessedPlayerName}"`;
+      await persistRoom(room);
       return { room, isCorrect: false };
     }
   },
@@ -397,11 +472,11 @@ export const multiplayerStore = {
   /**
    * Pes etme / Turu terk etme
    */
-  forfeitRound(code: string, playerId: string): { room: MultiplayerRoom } | { error: string } {
+  async forfeitRound(code: string, playerId: string): Promise<{ room: MultiplayerRoom } | { error: string }> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
     const cleanPlayerId = sanitizeInput(playerId, 40);
 
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
     const isHost = room.host.id === cleanPlayerId;
@@ -420,7 +495,7 @@ export const multiplayerStore = {
     const targetPlayerId = room.playerIds[room.currentRoundIndex];
     const targetPlayer = PLAYERS.find((p) => p.id === targetPlayerId);
 
-    this.finishRound(
+    await this.finishRound(
       cleanCode,
       opponentId,
       `🏳️ ${forfeiterName} pes etti! Gol ${opponentName}'e yazıldı. Doğru cevap: ${targetPlayer?.name || ""}`
@@ -432,11 +507,11 @@ export const multiplayerStore = {
   /**
    * Pas geçildiğinde sıradaki kulübü açar
    */
-  skipPass(code: string, playerId: string): { room: MultiplayerRoom } | { error: string } {
+  async skipPass(code: string, playerId: string): Promise<{ room: MultiplayerRoom } | { error: string }> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
     const cleanPlayerId = sanitizeInput(playerId, 40);
 
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
     const isHost = room.host.id === cleanPlayerId;
@@ -458,17 +533,18 @@ export const multiplayerStore = {
     const playerName = isHost ? room.host.name : (room.guest?.name || "Rakip");
 
     room.actionNotice = `${playerName} pas geçti (+1 Kulüp Açıldı)`;
+    await persistRoom(room);
     return { room };
   },
 
   /**
    * Rövanş isteği
    */
-  requestRematch(code: string, playerId: string): MultiplayerRoom | null {
+  async requestRematch(code: string, playerId: string): Promise<MultiplayerRoom | null> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
     const cleanPlayerId = sanitizeInput(playerId, 40);
 
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
     if (!room) return null;
 
     const isHost = room.host.id === cleanPlayerId;
@@ -504,18 +580,19 @@ export const multiplayerStore = {
       room.actionNotice = `${who} rövanş istiyor! (1/2)`;
     }
 
+    await persistRoom(room);
     return room;
   },
 
   /**
    * Canlı emoji reaksiyonu gönderir (Emoji Whitelist korumalı)
    */
-  sendReaction(code: string, playerId: string, emoji: string): { room: MultiplayerRoom } | { error: string } {
+  async sendReaction(code: string, playerId: string, emoji: string): Promise<{ room: MultiplayerRoom } | { error: string }> {
     const cleanCode = sanitizeInput(code, 6).toUpperCase();
     const cleanPlayerId = sanitizeInput(playerId, 40);
     const safeEmoji = ALLOWED_EMOJIS.has(emoji) ? emoji : "⚽";
 
-    const room = rooms.get(cleanCode);
+    const room = await fetchRoom(cleanCode);
     if (!room) return { error: "Oda bulunamadı" };
 
     const isHost = room.host.id === cleanPlayerId;
@@ -535,6 +612,7 @@ export const multiplayerStore = {
     };
 
     room.latestReaction = reaction;
+    await persistRoom(room);
     return { room };
   },
 };

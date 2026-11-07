@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const room = multiplayerStore.getRoom(code, playerId);
+  const room = await multiplayerStore.getRoom(code, playerId);
   if (!room) {
     return NextResponse.json(
       { error: "Oda bulunamadı" },
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (action === "create") {
       const { hostName, customCode } = body;
-      const res = multiplayerStore.createRoom(hostName, customCode);
+      const res = await multiplayerStore.createRoom(hostName, customCode);
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400, headers: NO_CACHE_HEADERS });
       }
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       if (!code) {
         return NextResponse.json({ error: "Oda kodu gerekli" }, { status: 400, headers: NO_CACHE_HEADERS });
       }
-      const res = multiplayerStore.joinRoom(code, guestName);
+      const res = await multiplayerStore.joinRoom(code, guestName);
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400, headers: NO_CACHE_HEADERS });
       }
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       if (!code || !playerId || !guessedPlayerId) {
         return NextResponse.json({ error: "Eksik parametre" }, { status: 400, headers: NO_CACHE_HEADERS });
       }
-      const res = multiplayerStore.submitGuess(code, playerId, guessedPlayerId);
+      const res = await multiplayerStore.submitGuess(code, playerId, guessedPlayerId);
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400, headers: NO_CACHE_HEADERS });
       }
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       if (!code || !playerId) {
         return NextResponse.json({ error: "Eksik parametre" }, { status: 400, headers: NO_CACHE_HEADERS });
       }
-      const res = multiplayerStore.skipPass(code, playerId);
+      const res = await multiplayerStore.skipPass(code, playerId);
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400, headers: NO_CACHE_HEADERS });
       }
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       if (!code || !playerId) {
         return NextResponse.json({ error: "Eksik parametre" }, { status: 400, headers: NO_CACHE_HEADERS });
       }
-      const res = multiplayerStore.forfeitRound(code, playerId);
+      const res = await multiplayerStore.forfeitRound(code, playerId);
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400, headers: NO_CACHE_HEADERS });
       }
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       if (!code || !playerId) {
         return NextResponse.json({ error: "Eksik parametre" }, { status: 400, headers: NO_CACHE_HEADERS });
       }
-      const room = multiplayerStore.requestRematch(code, playerId);
+      const room = await multiplayerStore.requestRematch(code, playerId);
       if (!room) {
         return NextResponse.json({ error: "Oda bulunamadı" }, { status: 404, headers: NO_CACHE_HEADERS });
       }
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       if (!code || !playerId || !emoji) {
         return NextResponse.json({ error: "Eksik parametre" }, { status: 400, headers: NO_CACHE_HEADERS });
       }
-      const res = multiplayerStore.sendReaction(code, playerId, emoji);
+      const res = await multiplayerStore.sendReaction(code, playerId, emoji);
       if ("error" in res) {
         return NextResponse.json({ error: res.error }, { status: 400, headers: NO_CACHE_HEADERS });
       }

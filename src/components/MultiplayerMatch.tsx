@@ -247,6 +247,28 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
             soundManager.playWrong();
           }
         } else if (data.error) {
+          // Serverless konteyner senkronizasyonunda 1 kez sessizce yeniden dene
+          if (data.error.includes("Oda bulunamadı")) {
+            try {
+              await new Promise((r) => setTimeout(r, 350));
+              const retryRes = await fetch("/api/room", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  action: "guess",
+                  code: room.code,
+                  playerId: myPlayerId,
+                  guessedPlayerId: player.id,
+                }),
+              });
+              const retryData = await retryRes.json();
+              if (retryData.room) {
+                setRoom(retryData.room);
+                if (!retryData.isCorrect) soundManager.playWrong();
+                return;
+              }
+            } catch {}
+          }
           setGuessError(data.error);
           setTimeout(() => setGuessError(null), 3500);
         }
@@ -302,6 +324,25 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
       if (data.room) {
         setRoom(data.room);
       } else if (data.error) {
+        if (data.error.includes("Oda bulunamadı")) {
+          try {
+            await new Promise((r) => setTimeout(r, 350));
+            const retryRes = await fetch("/api/room", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "forfeit",
+                code: room.code,
+                playerId: myPlayerId,
+              }),
+            });
+            const retryData = await retryRes.json();
+            if (retryData.room) {
+              setRoom(retryData.room);
+              return;
+            }
+          } catch {}
+        }
         setGuessError(data.error);
         setTimeout(() => setGuessError(null), 3000);
       }
