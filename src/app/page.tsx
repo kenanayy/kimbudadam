@@ -14,11 +14,8 @@ import { FootballPitchBackground } from "@/components/FootballPitchBackground";
 import { GameLogo } from "@/components/GameLogo";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { JokerConsole } from "@/components/JokerConsole";
-import { MultiplayerModal } from "@/components/MultiplayerModal";
-import { MultiplayerMatch } from "@/components/MultiplayerMatch";
 import { DailyGameView } from "@/components/DailyGameView";
 import { DailyResultModal } from "@/components/DailyResultModal";
-import { MultiplayerRoom } from "@/types/multiplayer";
 import { DailyGameResult, DailyStats } from "@/types/daily";
 import {
   getDailyChallengeInfo,
@@ -39,7 +36,7 @@ import {
 } from "lucide-react";
 
 export default function FootballerGuessPage() {
-  const [view, setView] = useState<"MENU" | "GAME" | "MULTIPLAYER" | "DAILY">("MENU");
+  const [view, setView] = useState<"MENU" | "GAME" | "DAILY">("MENU");
   const [difficulty, setDifficulty] = useState<Difficulty>("ORTA");
   const [category, setCategory] = useState<Category>("ALL");
   const [targetPlayer, setTargetPlayer] = useState<Player | null>(null);
@@ -59,12 +56,6 @@ export default function FootballerGuessPage() {
     stats: DailyStats;
     player: Player;
   } | null>(null);
-
-  // ⚡ Canlı Multiplayer Durumları
-  const [isMultiplayerOpen, setIsMultiplayerOpen] = useState<boolean>(false);
-  const [multiplayerRoom, setMultiplayerRoom] = useState<MultiplayerRoom | null>(null);
-  const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
-  const [urlRoomCode, setUrlRoomCode] = useState<string>("");
 
   // ⚡ Joker (Can Simidi) Durumları
   const [extraClubUsed, setExtraClubUsed] = useState<boolean>(false);
@@ -114,41 +105,6 @@ export default function FootballerGuessPage() {
         bestStreak: savedBest,
         totalScore: savedScore,
       });
-
-      // URL'de oda parametresi varsa (?oda=1905)
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        const oda = params.get("oda");
-        if (oda) {
-          setUrlRoomCode(oda.toUpperCase());
-          setIsMultiplayerOpen(true);
-        }
-
-        // Aktif multiplayer oturumu varsa geri yükle (Sayfa yenilendiğinde maçı kaybetmeme)
-        try {
-          const activeMpRaw = localStorage.getItem("mp_active_session");
-          if (activeMpRaw) {
-            const { code, playerId } = JSON.parse(activeMpRaw);
-            if (code && playerId) {
-              fetch(`/api/room?code=${code}&playerId=${playerId}&_t=${Date.now()}`, {
-                cache: "no-store",
-                headers: { "Cache-Control": "no-cache" },
-              })
-                .then((res) => res.json())
-                .then((data) => {
-                  if (data.room && data.room.status !== "GAME_OVER") {
-                    setMultiplayerRoom(data.room);
-                    setMyPlayerId(playerId);
-                    setView("MULTIPLAYER");
-                  } else {
-                    localStorage.removeItem("mp_active_session");
-                  }
-                })
-                .catch(() => {});
-            }
-          }
-        } catch {}
-      }
     } catch {}
   }, []);
 
@@ -207,25 +163,6 @@ export default function FootballerGuessPage() {
     } catch {}
     pickNewPlayer([], diff, cat);
     setView("GAME");
-  };
-
-  // Canlı 1v1 Maç Başlatma / Ayrılma
-  const handleStartMultiplayerMatch = (room: MultiplayerRoom, playerId: string) => {
-    soundManager.unlock();
-    soundManager.startMusic();
-    setMultiplayerRoom(room);
-    setMyPlayerId(playerId);
-    setIsMultiplayerOpen(false);
-    setView("MULTIPLAYER");
-  };
-
-  const handleLeaveMultiplayerMatch = () => {
-    try {
-      localStorage.removeItem("mp_active_session");
-    } catch {}
-    setMultiplayerRoom(null);
-    setMyPlayerId(null);
-    setView("MENU");
   };
 
   const toggleSound = () => {
@@ -423,29 +360,12 @@ export default function FootballerGuessPage() {
   const remainingAttempts = Math.max(0, activeConfig.maxAttempts - guesses.length);
   const isLastChance = gameState === "PLAYING" && remainingAttempts === 0;
 
-  // 0. CANLI 1v1 MULTIPLAYER GÖRÜNÜMÜ
-  if (view === "MULTIPLAYER" && multiplayerRoom && myPlayerId) {
-    return (
-      <main className="relative min-h-screen text-slate-800 font-sans overflow-x-hidden pb-12">
-        <FootballPitchBackground />
-        <MultiplayerMatch
-          initialRoom={multiplayerRoom}
-          myPlayerId={myPlayerId}
-          onLeaveMatch={handleLeaveMultiplayerMatch}
-          soundEnabled={soundEnabled}
-          onToggleSound={toggleSound}
-        />
-      </main>
-    );
-  }
-
   // 1. ANA MENÜ GÖRÜNÜMÜ
   if (view === "MENU") {
     return (
       <>
         <MainMenu
           onStartGame={handleStartGame}
-          onOpenMultiplayer={() => setIsMultiplayerOpen(true)}
           onStartDaily={() => {
             soundManager.unlock();
             soundManager.startMusic();
@@ -466,12 +386,6 @@ export default function FootballerGuessPage() {
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
           totalPlayersCount={PLAYERS.length}
-        />
-        <MultiplayerModal
-          isOpen={isMultiplayerOpen}
-          onClose={() => setIsMultiplayerOpen(false)}
-          onStartMatch={handleStartMultiplayerMatch}
-          initialCode={urlRoomCode}
         />
         {dailyModalData && (
           <DailyResultModal

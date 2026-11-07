@@ -32,7 +32,7 @@ import { soundManager } from "@/utils/sound";
 
 interface MainMenuProps {
   onStartGame: (difficulty: Difficulty, category: Category) => void;
-  onOpenMultiplayer: () => void;
+  onOpenMultiplayer?: () => void;
   onStartDaily: () => void;
   onOpenDailyResult: () => void;
   stats: GameStats;
@@ -590,39 +590,11 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             </div>
 
             <span className="tracking-wide uppercase font-black">
-              TEK KİŞİLİK OYNA
+              OYUNU BAŞLAT
             </span>
 
             {/* İleri Oku */}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-200 stroke-[2.5]" />
-          </button>
-
-          {/* 🌙 GECE DERBİSİ: CANLI 1v1 BUTONU (OBSİDYEN SİYAH & PARLAK ALTIN) */}
-          <button
-            type="button"
-            onClick={() => {
-              soundManager.playClick();
-              onOpenMultiplayer();
-            }}
-            className="group relative overflow-hidden w-full py-3.5 sm:py-4 px-6 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 hover:from-black hover:via-slate-900 hover:to-black text-white font-extrabold text-sm sm:text-base rounded-2xl border-2 border-amber-400/90 hover:border-amber-300 shadow-xl shadow-amber-500/10 hover:shadow-2xl hover:shadow-amber-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer"
-          >
-            {/* Holografik Altın Işık Süpürme Efekti */}
-            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-amber-300/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
-
-            {/* Kılıçlar İkon Rozeti */}
-            <div className="w-8 h-8 rounded-xl bg-amber-400/15 border border-amber-400/40 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm shrink-0">
-              <Swords className="w-4 h-4 text-amber-400" />
-            </div>
-
-            {/* Metin & Alt Açıklama */}
-            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2.5">
-              <span className="tracking-wide uppercase font-black text-amber-300 group-hover:text-amber-200 transition-colors">
-                CANLI 1v1 DERBİ
-              </span>
-              <span className="text-[11px] font-mono font-bold text-amber-300/90 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-400/40">
-                (ARKADAŞINA MEYDAN OKU ⚔️)
-              </span>
-            </div>
           </button>
         </div>
 
