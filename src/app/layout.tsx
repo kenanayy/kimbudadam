@@ -17,8 +17,39 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kimbuadam.netlify.app"),
   title: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
-  description: "Transfer ve kariyer geçmişinden futbolcuyu bulma oyunu",
+  description: "Transfer ve kariyer geçmişinden futbolcuyu bulma oyunu. Günün futbolcusunu çöz, futbol bilgini test et!",
+  applicationName: "Kim Bu Adam?",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
+    description: "Transfer ve kariyer geçmişinden futbolcuyu bulma oyunu. Günün futbolcusunu çöz, futbol bilgini test et!",
+    url: "https://kimbuadam.netlify.app",
+    siteName: "Kim Bu Adam?",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
+      },
+    ],
+    locale: "tr_TR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
+    description: "Transfer ve kariyer geçmişinden futbolcuyu bulma oyunu. Günün futbolcusunu çöz, futbol bilgini test et!",
+    images: ["/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {
