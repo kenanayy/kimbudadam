@@ -66,67 +66,67 @@ export const DailyChallengeCard: React.FC<DailyChallengeCardProps> = ({
   const isCompleted = Boolean(todayResult);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border-2 border-emerald-500/40 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/90 p-4 sm:p-5 shadow-xl shadow-emerald-950/20 text-white group">
-      {/* Arka plan ışık efekti */}
-      <div className="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none group-hover:bg-emerald-500/25 transition-all duration-700" />
-      <div className="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+    <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-4 sm:p-5 shadow-sm text-slate-800 group hover:border-emerald-300/80 transition-all duration-300">
+      {/* Hafif arka plan renk ışıması */}
+      <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-emerald-500/8 blur-3xl pointer-events-none group-hover:bg-emerald-500/15 transition-all duration-700" />
+      <div className="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-amber-500/5 blur-3xl pointer-events-none" />
 
       {/* Holografik süpürme efekti */}
-      <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
         {/* Sol Taraf: Rozet, Başlık ve Açıklama */}
         <div className="space-y-1.5 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider bg-emerald-900/90 text-emerald-300 border border-emerald-500/40 px-2.5 py-0.5 rounded-full shadow-xs">
-              <Calendar className="w-3 h-3 text-emerald-400" />
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider bg-emerald-100 text-emerald-950 border border-emerald-300 px-2.5 py-0.5 rounded-full shadow-2xs">
+              <Calendar className="w-3 h-3 text-emerald-700 stroke-[2.5]" />
               <span>GÜNÜN FUTBOLCUSU #{dailyInfo.dayNumber}</span>
             </span>
 
-            <span className="text-[11px] font-mono text-slate-400">
+            <span className="text-[11px] font-mono text-slate-500 font-bold">
               {dailyInfo.formattedDate}
             </span>
 
             {stats && stats.currentStreak > 0 && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">
-                <Flame className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full shadow-2xs">
+                <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
                 <span>{stats.currentStreak} Gün Seri</span>
               </span>
             )}
           </div>
 
-          <h3 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
+          <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-950 flex items-center gap-2">
             <span>Günün Futbolcusu</span>
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30">
+            <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
               GÜNLÜK MOD
             </span>
           </h3>
 
-          <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
+          <div className="text-xs text-slate-600 max-w-xl font-medium leading-relaxed">
             {isCompleted ? (
               todayResult?.isWon ? (
-                <span className="text-emerald-300 font-bold flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 inline shrink-0" />
-                  Tebrikler! Bugünün futbolcusunu {todayResult.attemptsUsed}/{todayResult.maxAttempts} denemede çözdün.
-                </span>
+                <div className="inline-flex items-center gap-1.5 text-xs text-emerald-800 font-bold bg-emerald-50/90 px-3 py-1.5 rounded-xl border border-emerald-200 shadow-2xs">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 inline shrink-0 stroke-[2.5]" />
+                  <span>Tebrikler! Bugünün futbolcusunu {todayResult.attemptsUsed}/{todayResult.maxAttempts} denemede çözdün.</span>
+                </div>
               ) : (
-                <span className="text-rose-300 font-bold flex items-center gap-1.5">
-                  <XCircle className="w-4 h-4 text-rose-400 inline shrink-0" />
-                  Bugünkü 6 hakkın bitti. Yarınki yeni futbolcuyu bekle!
-                </span>
+                <div className="inline-flex items-center gap-1.5 text-xs text-rose-800 font-bold bg-rose-50/90 px-3 py-1.5 rounded-xl border border-rose-200 shadow-2xs">
+                  <XCircle className="w-4 h-4 text-rose-600 inline shrink-0 stroke-[2.5]" />
+                  <span>Bugünkü 6 hakkın bitti. Yarınki yeni futbolcuyu bekle!</span>
+                </div>
               )
             ) : (
-              "Her gün tüm dünyada aynı gizemli futbolcu aranıyor. Tek şansın var, kariyer adımlarını çöz ve skorunu paylaş!"
+              <p>Her gün tüm dünyada aynı gizemli futbolcu aranıyor. Tek şansın var, kariyer adımlarını çöz ve skorunu paylaş!</p>
             )}
-          </p>
+          </div>
         </div>
 
         {/* Sağ Taraf: Geri Sayım ve Aksiyon Butonu */}
-        <div className="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-slate-950/60 px-2.5 py-1 rounded-xl border border-slate-800">
-            <Clock className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+        <div className="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 bg-slate-100/90 px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
             <span>Yenilenmeye:</span>
-            <span className="text-emerald-300 font-bold">{timeRemaining}</span>
+            <span className="text-emerald-700 font-black">{timeRemaining}</span>
           </div>
 
           {isCompleted ? (
@@ -136,9 +136,9 @@ export const DailyChallengeCard: React.FC<DailyChallengeCardProps> = ({
                 soundManager.playClick();
                 onOpenDailyResult();
               }}
-              className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-emerald-500/40 text-emerald-300 font-black text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md hover:-translate-y-0.5 active:translate-y-0"
+              className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-100 border border-slate-300 text-slate-900 font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-2xs hover:-translate-y-0.5 active:translate-y-0"
             >
-              <Share2 className="w-4 h-4 text-emerald-400" />
+              <Share2 className="w-4 h-4 text-emerald-700 stroke-[2.5]" />
               <span>Sonucunu Gör & Paylaş 📋</span>
             </button>
           ) : (
@@ -148,10 +148,14 @@ export const DailyChallengeCard: React.FC<DailyChallengeCardProps> = ({
                 soundManager.playClick();
                 onStartDaily();
               }}
-              className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 hover:brightness-110 active:brightness-95 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+              className="group/btn relative overflow-hidden py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:via-teal-500 hover:to-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
             >
+              {/* Animasyonlu Işık Süpürme */}
+              <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 -translate-x-full group-hover/btn:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
+
+              <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Günün Futbolcusunu Çöz</span>
-              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              <ArrowRight className="w-4 h-4 stroke-[2.5] group-hover/btn:translate-x-1 transition-transform" />
             </button>
           )}
         </div>
