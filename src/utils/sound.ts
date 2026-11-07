@@ -1,53 +1,21 @@
-// Web Audio API ile sıfır harici dosya yüküyle çalışan profesyonel futbol oyunu ses & müzik motoru
+// Web Audio API ile sıfır harici dosya yüküyle çalışan profesyonel futbol oyunu ses & stadyum ambiyans motoru
 class SoundManager {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
-  public musicEnabled: boolean = true;
+  public musicEnabled: boolean = true; // Stadyum ambiyansı açık/kapalı
   private isUnlocked: boolean = false;
 
-  // 🎵 Arka Plan Stadyum Lounge Müziği Değişkenleri
-  private musicGainNode: GainNode | null = null;
-  private musicInterval: ReturnType<typeof setInterval> | null = null;
-  private nextBarTime: number = 0;
-  private currentBarIndex: number = 0;
-  private isMusicPlaying: boolean = false;
-  private noiseBuffer: AudioBuffer | null = null;
-
-  // FIFA / EA FC Stili Rahatlatıcı Maç Odası Akor Dizilimi (88 BPM)
-  private readonly bpm = 88;
-  private readonly beatDuration = 60 / 88; // ~0.6818s
-  private readonly barDuration = (60 / 88) * 4; // ~2.727s
-
-  private readonly chords = [
-    // 1. Fmaj9 (Sıcak & İlham Verici)
-    {
-      root: 87.31, // F2
-      bassGroove: [0, (60 / 88) * 2], // Beat 1 ve Beat 3
-      notes: [220.0, 261.63, 329.63, 392.0], // A3, C4, E4, G4
-    },
-    // 2. G6 (Akıcı ve Yükselen)
-    {
-      root: 98.0, // G2
-      bassGroove: [0, (60 / 88) * 2],
-      notes: [196.0, 261.63, 293.66, 329.63], // G3, C4, D4, E4
-    },
-    // 3. Em7 (Rahatlatıcı Derinlik)
-    {
-      root: 82.41, // E2
-      bassGroove: [0, (60 / 88) * 2],
-      notes: [196.0, 246.94, 293.66, 392.0], // G3, B3, D4, G4
-    },
-    // 4. Am9 (Zarif Çözümleme)
-    {
-      root: 110.0, // A2
-      bassGroove: [0, (60 / 88) * 1.5, (60 / 88) * 2.5],
-      notes: [220.0, 261.63, 329.63, 392.0], // A3, C4, E4, G4
-    },
-  ];
+  // 🏟️ Canlı Stadyum & Tribün Ambiyansı Değişkenleri
+  private ambienceGainNode: GainNode | null = null;
+  private crowdBuffer: AudioBuffer | null = null;
+  private crowdSource: AudioBufferSourceNode | null = null;
+  private lfoOsc: OscillatorNode | null = null;
+  private swellInterval: ReturnType<typeof setInterval> | null = null;
+  private isAmbiencePlaying: boolean = false;
 
   constructor() {
     if (typeof window !== "undefined") {
-      // Sayfadaki ilk tıklama/dokunmada AudioContext'i anında uyandır ve müziği başlat
+      // Sayfadaki ilk tıklama/dokunmada AudioContext'i anında uyandır ve stadyum atmosferini başlat
       const unlockAudio = () => {
         this.unlock();
       };
@@ -58,8 +26,8 @@ class SoundManager {
 
   public unlock() {
     if (this.isUnlocked && this.ctx && this.ctx.state === "running") {
-      if (this.enabled && this.musicEnabled && !this.isMusicPlaying) {
-        this.startMusic();
+      if (this.enabled && this.musicEnabled && !this.isAmbiencePlaying) {
+        this.startAmbience();
       }
       return;
     }
@@ -68,14 +36,14 @@ class SoundManager {
       if (ctx && ctx.state === "suspended") {
         ctx.resume().then(() => {
           this.isUnlocked = true;
-          if (this.enabled && this.musicEnabled && !this.isMusicPlaying) {
-            this.startMusic();
+          if (this.enabled && this.musicEnabled && !this.isAmbiencePlaying) {
+            this.startAmbience();
           }
         }).catch(() => {});
       } else if (ctx) {
         this.isUnlocked = true;
-        if (this.enabled && this.musicEnabled && !this.isMusicPlaying) {
-          this.startMusic();
+        if (this.enabled && this.musicEnabled && !this.isAmbiencePlaying) {
+          this.startAmbience();
         }
       }
     } catch {}
@@ -100,196 +68,247 @@ class SoundManager {
     return this.ctx;
   }
 
-  private getMusicGain(ctx: AudioContext): GainNode {
-    if (!this.musicGainNode) {
-      this.musicGainNode = ctx.createGain();
-      this.musicGainNode.gain.setValueAtTime(0.001, ctx.currentTime);
-      this.musicGainNode.connect(ctx.destination);
+  private getAmbienceGain(ctx: AudioContext): GainNode {
+    if (!this.ambienceGainNode) {
+      this.ambienceGainNode = ctx.createGain();
+      this.ambienceGainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
+      this.ambienceGainNode.connect(ctx.destination);
     }
-    return this.musicGainNode;
+    return this.ambienceGainNode;
   }
 
-  private getNoiseBuffer(ctx: AudioContext): AudioBuffer {
-    if (this.noiseBuffer) return this.noiseBuffer;
-    const bufferSize = Math.floor(ctx.sampleRate * 0.5); // 0.5 saniyelik hafif fırça/shaker gürültüsü
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+  /**
+   * 🏟️ 8 Saniyelik Dikişsiz (Seamless) Stereo Tribün Pembe Gürültü Tamponu
+   */
+  private getStadiumCrowdBuffer(ctx: AudioContext): AudioBuffer {
+    if (this.crowdBuffer) return this.crowdBuffer;
+
+    const length = ctx.sampleRate * 8; // 8 saniyelik zengin döngü
+    const buffer = ctx.createBuffer(2, length, ctx.sampleRate);
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
+
+    // Paul Kellet Pink Noise Filtresi (Doğal akustik tribün rezonansı için)
+    let b0L = 0, b1L = 0, b2L = 0, b3L = 0, b4L = 0, b5L = 0, b6L = 0;
+    let b0R = 0, b1R = 0, b2R = 0, b3R = 0, b4R = 0, b5R = 0, b6R = 0;
+
+    for (let i = 0; i < length; i++) {
+      // Sol Kanal
+      const whiteL = Math.random() * 2 - 1;
+      b0L = 0.99886 * b0L + whiteL * 0.0555179;
+      b1L = 0.99332 * b1L + whiteL * 0.0750759;
+      b2L = 0.96900 * b2L + whiteL * 0.153852;
+      b3L = 0.86650 * b3L + whiteL * 0.3104856;
+      b4L = 0.55000 * b4L + whiteL * 0.5329522;
+      b5L = -0.7616 * b5L - whiteL * 0.016898;
+      left[i] = (b0L + b1L + b2L + b3L + b4L + b5L + b6L + whiteL * 0.5362) * 0.11;
+      b6L = whiteL * 0.115926;
+
+      // Sağ Kanal (Geniş stadyum derinliği için bağımsız pembe gürültü)
+      const whiteR = Math.random() * 2 - 1;
+      b0R = 0.99886 * b0R + whiteR * 0.0555179;
+      b1R = 0.99332 * b1R + whiteR * 0.0750759;
+      b2R = 0.96900 * b2R + whiteR * 0.153852;
+      b3R = 0.86650 * b3R + whiteR * 0.3104856;
+      b4R = 0.55000 * b4R + whiteR * 0.5329522;
+      b5R = -0.7616 * b5R - whiteR * 0.016898;
+      right[i] = (b0R + b1R + b2R + b3R + b4R + b5R + b6R + whiteR * 0.5362) * 0.11;
+      b6R = whiteR * 0.115926;
     }
-    this.noiseBuffer = buffer;
+
+    // Döngü geçiş noktasında (Loop point) tık/pıt sesini önleyen kusursuz çapraz geçiş (Crossfade)
+    const fadeSamples = Math.floor(ctx.sampleRate * 0.4);
+    for (let i = 0; i < fadeSamples; i++) {
+      const t = i / fadeSamples;
+      const endIdx = length - fadeSamples + i;
+
+      const blendL = left[i] * t + left[endIdx] * (1 - t);
+      left[i] = blendL;
+      left[endIdx] = blendL;
+
+      const blendR = right[i] * t + right[endIdx] * (1 - t);
+      right[i] = blendR;
+      right[endIdx] = blendR;
+    }
+
+    this.crowdBuffer = buffer;
     return buffer;
   }
 
   // =========================================================================
-  // 🎵 ARKA PLAN MÜZİĞİ MOTORU (CHILL STADIUM LOUNGE)
+  // 🏟️ CANLI STADYUM & TRİBÜN AMBİYANS MOTORU (CROWD & STADIUM AMBIENCE)
   // =========================================================================
+
+  // Geriye dönük uyumluluk: Kodun geri kalanı startMusic/stopMusic çağırdığında ambiyansı yönetir
   public startMusic() {
+    this.startAmbience();
+  }
+
+  public stopMusic() {
+    this.stopAmbience();
+  }
+
+  /**
+   * Stadyum ambiyansını başlatır (Tribün uğultusu, maç atmosferi ve dalgalanmalar)
+   */
+  public startAmbience() {
     if (!this.enabled || !this.musicEnabled) return;
     const ctx = this.getAudioContext();
     if (!ctx) return;
 
-    if (this.isMusicPlaying) return;
-    this.isMusicPlaying = true;
+    if (this.isAmbiencePlaying) return;
+    this.isAmbiencePlaying = true;
 
-    const musicGain = this.getMusicGain(ctx);
-    const now = ctx.currentTime;
-    // Yumuşak geçişle müziği başlat (Fade-in)
-    musicGain.gain.cancelScheduledValues(now);
-    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
-    musicGain.gain.linearRampToValueAtTime(0.12, now + 1.2);
+    try {
+      const now = ctx.currentTime;
+      const ambienceGain = this.getAmbienceGain(ctx);
 
-    this.nextBarTime = now + 0.1;
-    this.currentBarIndex = 0;
+      // 1. Dikişsiz sürekli döngü kaynağı (Looping stereo crowd buffer)
+      const buffer = this.getStadiumCrowdBuffer(ctx);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      this.crowdSource = source;
 
-    // Düzenli aralıklarla önceden akorları planla (Scheduler loop)
-    if (this.musicInterval) clearInterval(this.musicInterval);
-    this.musicInterval = setInterval(() => {
-      this.scheduleMusicBars();
-    }, 250);
+      // 2. Akustik Filtreler:
+      // a) Derin Stadyum Çanağı Uğultusu (Low-pass ~380 Hz)
+      const rumbleFilter = ctx.createBiquadFilter();
+      rumbleFilter.type = "lowpass";
+      rumbleFilter.frequency.setValueAtTime(380, now);
+      rumbleFilter.Q.setValueAtTime(0.8, now);
 
-    this.scheduleMusicBars();
+      const rumbleGain = ctx.createGain();
+      rumbleGain.gain.setValueAtTime(0.75, now);
+
+      // b) Canlı İnsan Sesleri & Tezahürat Formantı (Band-pass ~720 Hz)
+      const voiceFilter = ctx.createBiquadFilter();
+      voiceFilter.type = "bandpass";
+      voiceFilter.frequency.setValueAtTime(720, now);
+      voiceFilter.Q.setValueAtTime(1.5, now);
+
+      const voiceGain = ctx.createGain();
+      voiceGain.gain.setValueAtTime(0.55, now);
+
+      // 3. Organik Tribün Nefesi (Slow LFO: 0.08 Hz = her 12 saniyede bir doğal dalgalanma)
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.frequency.setValueAtTime(0.08, now);
+      lfoGain.gain.setValueAtTime(120, now); // Frekansı 600 Hz - 840 Hz arasında hafifçe dalgalandırır
+      lfo.connect(lfoGain);
+      lfoGain.connect(voiceFilter.frequency);
+      lfo.start(now);
+      this.lfoOsc = lfo;
+
+      // Bağlantılar
+      source.connect(rumbleFilter);
+      rumbleFilter.connect(rumbleGain);
+      rumbleGain.connect(ambienceGain);
+
+      source.connect(voiceFilter);
+      voiceFilter.connect(voiceGain);
+      voiceGain.connect(ambienceGain);
+
+      source.start(now);
+
+      // Yumuşak geçişle arka plan sesini yükselt (Fade-in: 1.5s, rahatlatıcı ~0.07 seviyesi)
+      ambienceGain.gain.cancelScheduledValues(now);
+      ambienceGain.gain.setValueAtTime(ambienceGain.gain.value, now);
+      ambienceGain.gain.linearRampToValueAtTime(0.07, now + 1.5);
+
+      // 4. Periyodik Tribün Coşkusu & Uzak Heyecan Dalgaları (Her 14-22 saniyede bir)
+      if (this.swellInterval) clearInterval(this.swellInterval);
+      this.swellInterval = setInterval(() => {
+        this.triggerCrowdSwell();
+      }, 16000);
+    } catch {}
   }
 
-  public stopMusic() {
-    this.isMusicPlaying = false;
-    if (this.musicInterval) {
-      clearInterval(this.musicInterval);
-      this.musicInterval = null;
+  /**
+   * Stadyum ambiyansını yumuşak geçişle durdurur
+   */
+  public stopAmbience() {
+    this.isAmbiencePlaying = false;
+
+    if (this.swellInterval) {
+      clearInterval(this.swellInterval);
+      this.swellInterval = null;
     }
-    if (this.ctx && this.musicGainNode) {
+
+    if (this.ctx && this.ambienceGainNode) {
       const now = this.ctx.currentTime;
-      this.musicGainNode.gain.cancelScheduledValues(now);
-      this.musicGainNode.gain.setValueAtTime(this.musicGainNode.gain.value, now);
-      this.musicGainNode.gain.linearRampToValueAtTime(0.001, now + 0.4);
+      this.ambienceGainNode.gain.cancelScheduledValues(now);
+      this.ambienceGainNode.gain.setValueAtTime(this.ambienceGainNode.gain.value, now);
+      this.ambienceGainNode.gain.linearRampToValueAtTime(0.0001, now + 0.5);
+
+      setTimeout(() => {
+        if (!this.isAmbiencePlaying) {
+          try {
+            if (this.crowdSource) {
+              this.crowdSource.stop();
+              this.crowdSource.disconnect();
+              this.crowdSource = null;
+            }
+            if (this.lfoOsc) {
+              this.lfoOsc.stop();
+              this.lfoOsc.disconnect();
+              this.lfoOsc = null;
+            }
+          } catch {}
+        }
+      }, 550);
     }
   }
 
-  private scheduleMusicBars() {
-    if (!this.ctx || !this.isMusicPlaying || !this.enabled || !this.musicEnabled) return;
+  /**
+   * 🌊 Tribün Dalgalanması & Uzak Maç Heyecanı
+   * (Arada bir tribünlerin hücum sırasında hafifçe ayaklanması ve yatışması)
+   */
+  private triggerCrowdSwell() {
+    if (!this.ctx || !this.isAmbiencePlaying || !this.enabled || !this.musicEnabled) return;
 
-    const scheduleAheadTime = 1.2; // 1.2 saniye önceden planla
-    const musicGain = this.getMusicGain(this.ctx);
+    try {
+      const now = this.ctx.currentTime;
+      const ambienceGain = this.getAmbienceGain(this.ctx);
 
-    while (this.nextBarTime < this.ctx.currentTime + scheduleAheadTime) {
-      const chord = this.chords[this.currentBarIndex];
-      const barStart = this.nextBarTime;
+      // Hafif coşku kabarması (Swell: 2 saniyede yüksel, 3 saniyede eski haline dön)
+      const currentGain = 0.07;
+      ambienceGain.gain.cancelScheduledValues(now);
+      ambienceGain.gain.setValueAtTime(ambienceGain.gain.value, now);
+      ambienceGain.gain.linearRampToValueAtTime(currentGain * 1.45, now + 1.8);
+      ambienceGain.gain.linearRampToValueAtTime(currentGain, now + 4.2);
 
-      // 1. Yumuşak Rhodes / Elektrik Piyano Akoru
-      chord.notes.forEach((freq, idx) => {
-        try {
-          // Sıcak temel sinüs dalgası
-          const osc1 = this.ctx!.createOscillator();
-          const osc2 = this.ctx!.createOscillator();
-          const filter = this.ctx!.createBiquadFilter();
-          const gain = this.ctx!.createGain();
-
-          osc1.type = "sine";
-          osc1.frequency.setValueAtTime(freq, barStart);
-
-          // İnce koro derinliği için çok hafif detune edilmiş üçgen dalga
-          osc2.type = "triangle";
-          osc2.frequency.setValueAtTime(freq, barStart);
-          osc2.detune.setValueAtTime(3 + idx, barStart);
-
-          // Sıcak lo-fi stadyum tınısı (Low-pass)
-          filter.type = "lowpass";
-          filter.frequency.setValueAtTime(580, barStart);
-          filter.Q.setValueAtTime(0.7, barStart);
-
-          // Akor Zarfı (Zarif yumuşak vuruş)
-          const noteStart = barStart + idx * 0.02; // İpeksi arpej dokunuşu
-          gain.gain.setValueAtTime(0.0001, noteStart);
-          gain.gain.linearRampToValueAtTime(0.038, noteStart + 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.018, noteStart + 1.2);
-          gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + this.barDuration + 0.1);
-
-          osc1.connect(filter);
-          osc2.connect(filter);
-          filter.connect(gain);
-          gain.connect(musicGain);
-
-          osc1.start(noteStart);
-          osc2.start(noteStart);
-          osc1.stop(noteStart + this.barDuration + 0.15);
-          osc2.stop(noteStart + this.barDuration + 0.15);
-        } catch {}
-      });
-
-      // 2. Derin Sub-Bas Notası (Ritmin Temeli)
-      chord.bassGroove.forEach((offset) => {
-        try {
-          const bassTime = barStart + offset;
-          const bassOsc = this.ctx!.createOscillator();
-          const bassFilter = this.ctx!.createBiquadFilter();
-          const bassGain = this.ctx!.createGain();
-
-          bassOsc.type = "sine";
-          bassOsc.frequency.setValueAtTime(chord.root, bassTime);
-
-          bassFilter.type = "lowpass";
-          bassFilter.frequency.setValueAtTime(140, bassTime);
-
-          bassGain.gain.setValueAtTime(0.0001, bassTime);
-          bassGain.gain.linearRampToValueAtTime(0.07, bassTime + 0.04);
-          bassGain.gain.exponentialRampToValueAtTime(0.001, bassTime + 0.85);
-
-          bassOsc.connect(bassFilter);
-          bassFilter.connect(bassGain);
-          bassGain.connect(musicGain);
-
-          bassOsc.start(bassTime);
-          bassOsc.stop(bassTime + 0.9);
-        } catch {}
-      });
-
-      // 3. Hafif Ritmik Dokunuşlar (Muted Kick & Shaker)
-      try {
-        // Beat 1: Yumuşak Kick
-        const kickOsc = this.ctx.createOscillator();
-        const kickGain = this.ctx.createGain();
-        kickOsc.type = "sine";
-        kickOsc.frequency.setValueAtTime(95, barStart);
-        kickOsc.frequency.exponentialRampToValueAtTime(35, barStart + 0.08);
-
-        kickGain.gain.setValueAtTime(0.06, barStart);
-        kickGain.gain.exponentialRampToValueAtTime(0.001, barStart + 0.09);
-
-        kickOsc.connect(kickGain);
-        kickGain.connect(musicGain);
-        kickOsc.start(barStart);
-        kickOsc.stop(barStart + 0.1);
-
-        // Beat 2 & 4: Hafif Fırça / Shaker
-        [this.beatDuration, this.beatDuration * 3].forEach((shakerOffset) => {
+      // %35 ihtimalle uzaktan gelen hafif bir hakem düdüğü yankısı
+      if (Math.random() < 0.35) {
+        setTimeout(() => {
+          if (!this.isAmbiencePlaying || !this.ctx) return;
           try {
-            const shakerTime = barStart + shakerOffset;
-            const noise = this.ctx!.createBufferSource();
-            noise.buffer = this.getNoiseBuffer(this.ctx!);
+            const whistleTime = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
 
-            const shakerFilter = this.ctx!.createBiquadFilter();
-            shakerFilter.type = "bandpass";
-            shakerFilter.frequency.setValueAtTime(3600, shakerTime);
-            shakerFilter.Q.setValueAtTime(2.2, shakerTime);
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(2650, whistleTime);
+            osc.frequency.linearRampToValueAtTime(2720, whistleTime + 0.12);
 
-            const shakerGain = this.ctx!.createGain();
-            shakerGain.gain.setValueAtTime(0.02, shakerTime);
-            shakerGain.gain.exponentialRampToValueAtTime(0.0001, shakerTime + 0.04);
+            // Uzaklık filtresi (Havadaki ses yutulması)
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(3200, whistleTime);
 
-            noise.connect(shakerFilter);
-            shakerFilter.connect(shakerGain);
-            shakerGain.connect(musicGain);
+            gain.gain.setValueAtTime(0.0001, whistleTime);
+            gain.gain.linearRampToValueAtTime(0.012, whistleTime + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0001, whistleTime + 0.18);
 
-            noise.start(shakerTime);
-            noise.stop(shakerTime + 0.05);
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(whistleTime);
+            osc.stop(whistleTime + 0.2);
           } catch {}
-        });
-      } catch {}
-
-      // Sıradaki akora geç
-      this.nextBarTime += this.barDuration;
-      this.currentBarIndex = (this.currentBarIndex + 1) % this.chords.length;
-    }
+        }, 1200);
+      }
+    } catch {}
   }
 
   // =========================================================================
