@@ -29,6 +29,8 @@ import {
   Sparkles,
   Trophy,
   Share2,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 interface DailyGameViewProps {
@@ -36,6 +38,8 @@ interface DailyGameViewProps {
   onPlayRegularGame: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  theme?: "light" | "dark";
+  onToggleTheme?: () => void;
 }
 
 const DAILY_MAX_ATTEMPTS = 6;
@@ -45,6 +49,8 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
   onPlayRegularGame,
   soundEnabled,
   onToggleSound,
+  theme = "light",
+  onToggleTheme,
 }) => {
   const [dailyInfo, setDailyInfo] = useState<DailyChallengeInfo | null>(null);
   const [targetPlayer, setTargetPlayer] = useState<Player | null>(null);
@@ -326,15 +332,15 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
       <FootballPitchBackground />
 
       {/* Üst Header: Günlük Mücadele & Menü */}
-      <header className="relative z-10 border-b border-slate-200/90 bg-white/95 backdrop-blur-xl sticky top-0 shadow-xs text-slate-800">
+      <header className="relative z-10 border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl sticky top-0 shadow-xs text-slate-800 dark:text-slate-100">
         <div className="max-w-3xl mx-auto px-4 h-15 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onBackToMenu}
-              className="flex items-center gap-1.5 text-xs text-slate-900 hover:text-black py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold shadow-2xs"
+              className="flex items-center gap-1.5 text-xs text-slate-900 dark:text-slate-100 hover:text-black dark:hover:text-white py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold shadow-2xs"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-emerald-700 stroke-[2.5]" />
+              <ArrowLeft className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
               <span>Menü</span>
             </button>
             <GameLogo size="sm" showText={true} />
@@ -343,26 +349,42 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
           <div className="flex items-center gap-2 text-xs">
             {/* Günlük Seri */}
             {stats && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-mono text-[11px] shadow-2xs">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-[11px] shadow-2xs">
                 <span className="text-[10px] font-mono text-slate-400 uppercase hidden sm:inline">
                   Günlük Seri:
                 </span>
-                <div className="flex items-center gap-1 text-amber-600 font-black">
+                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-black">
                   <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                   <span>{stats.currentStreak} Gün</span>
                 </div>
               </div>
             )}
 
+            {/* Tema Değiştir */}
+            {onToggleTheme && (
+              <button
+                type="button"
+                onClick={onToggleTheme}
+                className="p-2 text-slate-800 dark:text-slate-200 hover:text-black dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
+                title={theme === "dark" ? "Aydınlık Moda Geç" : "Karanlık Moda Geç"}
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-700" />
+                )}
+              </button>
+            )}
+
             {/* Ses Aç / Kapa */}
             <button
               type="button"
               onClick={onToggleSound}
-              className="p-2 text-slate-800 hover:text-black rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all cursor-pointer shadow-2xs"
+              className="p-2 text-slate-800 dark:text-slate-200 hover:text-black dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
               title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
             >
               {soundEnabled ? (
-                <Volume2 className="w-4 h-4 text-emerald-700" />
+                <Volume2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               ) : (
                 <VolumeX className="w-4 h-4 text-slate-500" />
               )}
@@ -376,9 +398,9 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
         {/* ======================================================== */}
         {/* 🏟️ GÜNÜN FUTBOLCUSU OYUN KONSOLU                         */}
         {/* ======================================================== */}
-        <section className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-xl shadow-slate-950/10 space-y-4">
+        <section className="relative z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl shadow-slate-950/10 space-y-4">
           {/* 1. Üst Skor Tablosu & Hak Göstergesi */}
-          <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
+          <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3.5 min-w-0">
               <PlayerAvatar
                 player={targetPlayer}
@@ -389,22 +411,22 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 shadow-2xs">
-                    <Calendar className="w-3 h-3 text-emerald-700 stroke-[2.5]" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/60 shadow-2xs">
+                    <Calendar className="w-3 h-3 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
                     <span>GÜN #{dailyInfo.dayNumber}</span>
                   </span>
-                  <span className="text-[11px] font-mono text-slate-500 font-bold">
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-bold">
                     {dailyInfo.formattedDate}
                   </span>
                 </div>
 
-                <h2 className="text-base sm:text-xl font-black text-slate-950 tracking-tight truncate mt-0.5">
+                <h2 className="text-base sm:text-xl font-black text-slate-950 dark:text-white tracking-tight truncate mt-0.5">
                   {gameState === "PLAYING"
                     ? "Günün Gizemli Futbolcusu"
                     : targetPlayer.name}
                 </h2>
 
-                <p className="text-xs text-slate-600 font-medium truncate">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium truncate">
                   {gameState === "PLAYING"
                     ? isLastChance
                       ? "🔥 Dikkat! Son tahmin hakkın!"
@@ -418,14 +440,14 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
 
             {/* Hak Kutucukları & Skor Kartı Butonu */}
             <div className="flex flex-col items-end gap-2 shrink-0">
-              <div className="flex items-center gap-1 bg-slate-100/90 px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
-                <span className="text-[10px] font-mono font-bold text-slate-600 mr-1 hidden sm:inline">
+              <div className="flex items-center gap-1 bg-slate-100/90 dark:bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 mr-1 hidden sm:inline">
                   Hak:
                 </span>
                 {isLastChance ? (
                   <div className="flex items-center gap-1 px-0.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shadow-2xs" />
-                    <span className="text-[10px] font-mono font-black text-amber-700 tracking-wider">
+                    <span className="text-[10px] font-mono font-black text-amber-700 dark:text-amber-400 tracking-wider">
                       SON HAK
                     </span>
                   </div>
@@ -446,7 +468,7 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
                             ? "w-2.5 bg-rose-500"
                             : isCurrent
                             ? "w-4 bg-amber-500 shadow-xs shadow-amber-500/50 animate-pulse"
-                            : "w-2 bg-slate-300"
+                            : "w-2 bg-slate-300 dark:bg-slate-700"
                         }`}
                         title={`${i + 1}. Hak`}
                       />
@@ -459,9 +481,9 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsResultModalOpen(true)}
-                  className="py-1 px-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-xs font-mono font-black flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                  className="py-1 px-2.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/60 text-xs font-mono font-black flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
                 >
-                  <Share2 className="w-3 h-3 text-emerald-700" />
+                  <Share2 className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
                   <span>Skor Kartı</span>
                 </button>
               )}
@@ -474,6 +496,7 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
             revealedCount={revealedClubCount}
             isGameOver={gameState !== "PLAYING"}
             showLeague={true}
+            embedded={true}
           />
 
           {/* 3. Arama Çubuğu veya Oyun Bitti Bildirimi (Kariyerin hemen altında - klasik mod ergonomisi) */}

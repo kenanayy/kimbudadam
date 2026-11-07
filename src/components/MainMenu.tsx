@@ -24,6 +24,8 @@ import {
   Users,
   Swords,
   Crown,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { FootballPitchBackground } from "@/components/FootballPitchBackground";
 import { GameLogo } from "@/components/GameLogo";
@@ -38,6 +40,8 @@ interface MainMenuProps {
   stats: GameStats;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  theme?: "light" | "dark";
+  onToggleTheme?: () => void;
   totalPlayersCount: number;
 }
 
@@ -211,6 +215,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   stats,
   soundEnabled,
   onToggleSound,
+  theme = "light",
+  onToggleTheme,
   totalPlayersCount,
 }) => {
   const [selectedDifficulty, setSelectedDifficulty] =
@@ -227,12 +233,12 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   const counts = POOL_COUNTS;
 
   return (
-    <div className="relative min-h-screen text-slate-800 flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden font-sans">
+    <div className="relative min-h-screen text-slate-800 dark:text-slate-100 flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden font-sans">
       {/* Doğal Futbol Sahası Zemin Çizgileri */}
       <FootballPitchBackground />
 
       {/* Canlı Stadyum TV Header - Oyun İçi ile Birebir Aynı Tasarım */}
-      <header className="relative z-10 border-b border-slate-200/90 bg-white/95 backdrop-blur-xl sticky top-0 shadow-xs text-slate-800">
+      <header className="relative z-10 border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl sticky top-0 shadow-xs text-slate-800 dark:text-slate-100">
         <div className="max-w-3xl mx-auto px-4 h-15 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -246,30 +252,46 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                 soundManager.playClick();
                 setShowHowToPlay(true);
               }}
-              className="flex items-center gap-1.5 text-xs text-slate-900 hover:text-black py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold shadow-2xs"
+              className="flex items-center gap-1.5 text-xs text-slate-900 dark:text-slate-100 hover:text-black dark:hover:text-white py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold shadow-2xs"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-emerald-700 stroke-[2.5]" />
+              <HelpCircle className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
               <span className="hidden sm:inline">Nasıl Oynanır?</span>
             </button>
 
             {/* Puan & Seri */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-mono text-[11px] shadow-2xs">
-              <span className="font-extrabold text-slate-950">{stats.totalScore} p</span>
-              <span className="text-slate-300">•</span>
-              <div className="flex items-center gap-1 text-amber-600 font-black">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-[11px] shadow-2xs">
+              <span className="font-extrabold text-slate-950 dark:text-white">{stats.totalScore} p</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-black">
                 <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                 <span>{stats.streak}</span>
               </div>
             </div>
 
+            {/* Tema Değiştir (Karanlık / Aydınlık Mod) */}
+            {onToggleTheme && (
+              <button
+                type="button"
+                onClick={onToggleTheme}
+                className="p-2 text-slate-800 dark:text-slate-200 hover:text-black dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
+                title={theme === "dark" ? "Aydınlık Moda Geç" : "Karanlık Moda Geç"}
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-700" />
+                )}
+              </button>
+            )}
+
             {/* Mute Toggle */}
             <button
               onClick={onToggleSound}
-              className="p-2 text-slate-800 hover:text-black rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all cursor-pointer shadow-2xs"
+              className="p-2 text-slate-800 dark:text-slate-200 hover:text-black dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
               title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
             >
               {soundEnabled ? (
-                <Volume2 className="w-4 h-4 text-emerald-700" />
+                <Volume2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               ) : (
                 <VolumeX className="w-4 h-4 text-slate-500" />
               )}
@@ -288,17 +310,17 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         />
 
         {/* 1. Kategori / Lig Havuzu Seçimi (Futbol Kart Paketleri) */}
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between text-xs px-1">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700">
+              <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                 <Compass className="w-3.5 h-3.5" />
               </div>
-              <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+              <span className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm">
                 Lig & Kart Paketi Filtresi
               </span>
             </div>
-            <span className="text-[11px] font-mono text-slate-600 font-bold bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/80">
+            <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700">
               {counts[selectedCategory]} oyuncu hazır
             </span>
           </div>
@@ -326,7 +348,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[110px] ${
                     isSelected
                       ? `${meta.selectedBg} ${meta.selectedBorder}`
-                      : `bg-slate-50/90 hover:bg-white border-slate-200/90 text-slate-800 ${meta.hoverBorder} ${meta.hoverShadow}`
+                      : `bg-slate-50/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-800 text-slate-800 dark:text-slate-200 ${meta.hoverBorder} ${meta.hoverShadow}`
                   }`}
                 >
                   {/* Holografik Işık / Parıltı Süpürme Efekti */}
@@ -345,7 +367,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                       className={`text-[9px] font-mono font-black tracking-wider uppercase px-2 py-0.5 rounded-md border ${
                         isSelected
                           ? "bg-white/10 text-white border-white/20"
-                          : "bg-white text-slate-500 border-slate-200"
+                          : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       {meta.tag}
@@ -378,14 +400,14 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     <div className="min-w-0">
                       <h3
                         className={`text-sm sm:text-base font-black tracking-tight leading-none truncate transition-colors duration-200 ${
-                          isSelected ? "text-white" : "text-slate-900 group-hover:text-black"
+                          isSelected ? "text-white" : "text-slate-900 dark:text-white group-hover:text-black dark:group-hover:text-white"
                         }`}
                       >
                         {cat.label}
                       </h3>
                       <p
                         className={`text-[10px] font-medium truncate mt-1 ${
-                          isSelected ? "text-white/70" : "text-slate-500"
+                          isSelected ? "text-white/70" : "text-slate-500 dark:text-slate-400"
                         }`}
                       >
                         {meta.subtitle}
@@ -417,17 +439,17 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         </div>
 
         {/* 3. Zorluk Seviyesi (Koleksiyon Kart Kademeleri) */}
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between text-xs px-1">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700">
+              <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-amber-700 dark:text-amber-400">
                 <Zap className="w-3.5 h-3.5" />
               </div>
-              <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+              <span className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm">
                 Zorluk & Kart Kademesi
               </span>
             </div>
-            <span className="text-[11px] font-mono text-slate-600 font-bold bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/80">
+            <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700">
               {selectedDifficulty === "KOLAY"
                 ? "1x Skor"
                 : selectedDifficulty === "ORTA"
@@ -457,7 +479,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   className={`p-3 rounded-2xl border-2 text-left cursor-pointer relative overflow-hidden group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] flex flex-col justify-between min-h-[135px] ${
                     isSelected
                       ? `${meta.selectedBg} ${meta.selectedBorder} shadow-md`
-                      : `bg-slate-50/90 hover:bg-white border-slate-200/90 ${meta.hoverBorder} ${meta.hoverShadow}`
+                      : `bg-slate-50/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-800 ${meta.hoverBorder} ${meta.hoverShadow}`
                   }`}
                 >
                   {/* Holografik Işık / Parıltı Süpürme Efekti */}
@@ -485,7 +507,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                           ? "bg-purple-900/80 text-purple-200 border-purple-400/40"
                           : isSelected
                           ? "bg-white/80 text-slate-800 border-slate-200"
-                          : "bg-white text-slate-500 border-slate-200"
+                          : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       {meta.tier}
@@ -500,7 +522,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                           ? "bg-purple-800/80 text-amber-300"
                           : isSelected
                           ? "bg-white/95"
-                          : "bg-white text-slate-700 group-hover:bg-white"
+                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 group-hover:bg-white dark:group-hover:bg-slate-750"
                       } ${meta.iconColor}`}
                     >
                       <div className={`transition-transform duration-300 ${meta.iconAnimation}`}>
@@ -515,7 +537,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                             ? "text-white"
                             : isSelected
                             ? meta.labelColor
-                            : "text-slate-900 group-hover:text-black"
+                            : "text-slate-900 dark:text-white group-hover:text-black dark:group-hover:text-white"
                         }`}
                       >
                         {cfg.label}
@@ -531,7 +553,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                           ? "bg-purple-900/60 text-purple-200 border-purple-400/30"
                           : isSelected
                           ? meta.badgeSelected
-                          : `bg-white text-slate-700 border-slate-200 ${meta.badgeHover}`
+                          : `bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 ${meta.badgeHover}`
                       }`}
                     >
                       {cfg.maxAttempts} Hak
@@ -542,7 +564,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                           ? "bg-purple-950 text-amber-300 border-amber-400/30"
                           : isSelected
                           ? "bg-amber-100 text-amber-950 border-amber-300"
-                          : "bg-slate-100 text-slate-600 border-slate-200"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       {level === "KOLAY"
@@ -562,7 +584,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                         ? "border-purple-800 text-amber-300 font-bold"
                         : isSelected
                         ? "border-slate-200/60 text-slate-700 font-bold"
-                        : "border-slate-100 text-slate-500 font-medium"
+                        : "border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-medium"
                     }`}
                   >
                     {meta.perk}
@@ -599,8 +621,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         </div>
 
         {/* 5. Kariyer Karnesi (Skor Şeridi) */}
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs">
-          <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-100 text-xs font-semibold text-slate-700">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xs">
+          <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
             <div className="flex items-center gap-1.5">
               <Trophy className="w-4 h-4 text-emerald-600" />
               <span>Kariyer Karnen</span>
@@ -610,32 +632,32 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-4 divide-x divide-slate-100 text-center">
-            <div className="px-1 hover:bg-slate-50/80 rounded-lg transition-colors py-1">
+          <div className="grid grid-cols-4 divide-x divide-slate-100 dark:divide-slate-800 text-center">
+            <div className="px-1 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 rounded-lg transition-colors py-1">
               <div className="text-[10px] text-slate-400 font-mono uppercase">Toplam</div>
-              <div className="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5">
+              <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono mt-0.5">
                 {stats.totalScore}
               </div>
             </div>
 
-            <div className="px-1 hover:bg-slate-50/80 rounded-lg transition-colors py-1 group">
+            <div className="px-1 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 rounded-lg transition-colors py-1 group">
               <div className="text-[10px] text-slate-400 font-mono uppercase">Seri</div>
-              <div className="text-base sm:text-lg font-black text-amber-600 font-mono mt-0.5 flex items-center justify-center gap-1">
+              <div className="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400 font-mono mt-0.5 flex items-center justify-center gap-1">
                 <Flame className="w-4 h-4 fill-amber-500 text-amber-500 group-hover:scale-125 transition-transform" />
                 <span>{stats.streak}</span>
               </div>
             </div>
 
-            <div className="px-1 hover:bg-slate-50/80 rounded-lg transition-colors py-1">
+            <div className="px-1 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 rounded-lg transition-colors py-1">
               <div className="text-[10px] text-slate-400 font-mono uppercase">En İyi</div>
-              <div className="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5">
+              <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono mt-0.5">
                 {stats.bestStreak}
               </div>
             </div>
 
-            <div className="px-1 hover:bg-slate-50/80 rounded-lg transition-colors py-1">
+            <div className="px-1 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 rounded-lg transition-colors py-1">
               <div className="text-[10px] text-slate-400 font-mono uppercase">Başarı</div>
-              <div className="text-base sm:text-lg font-black text-emerald-700 font-mono mt-0.5">
+              <div className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
                 %{winRate}
               </div>
             </div>
@@ -652,24 +674,24 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       {/* Nasıl Oynanır Modal */}
       {showHowToPlay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative w-full max-w-sm bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 text-slate-800 dark:text-slate-100">
             <button
               onClick={() => setShowHowToPlay(false)}
-              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Nasıl Oynanır?
               </h3>
             </div>
 
-            <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
+            <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
                   1
                 </span>
                 <p>
@@ -679,7 +701,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               </div>
 
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
                   2
                 </span>
                 <p>
@@ -689,7 +711,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               </div>
 
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
                   3
                 </span>
                 <p>
@@ -699,7 +721,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               </div>
 
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
                   4
                 </span>
                 <p>
@@ -709,7 +731,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               </div>
 
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
                   5
                 </span>
                 <p>
@@ -718,7 +740,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               </div>
 
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center justify-center font-mono text-[10px] font-bold shrink-0 mt-0.5">
                   6
                 </span>
                 <p>

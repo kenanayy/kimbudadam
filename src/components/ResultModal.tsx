@@ -63,8 +63,8 @@ export const ResultModal: React.FC<ResultModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="relative w-full max-w-sm bg-white/98 backdrop-blur-2xl border border-slate-200/90 rounded-3xl p-6 shadow-2xl shadow-slate-950/20 text-center overflow-hidden ring-1 ring-slate-950/5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="relative w-full max-w-sm bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-2xl shadow-slate-950/20 text-center overflow-hidden ring-1 ring-slate-950/5">
         {/* Üst Şerit - Holografik Parıltı */}
         <div
           className={`absolute top-0 left-0 right-0 h-1.5 ${
@@ -77,7 +77,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
         {/* Kapat Butonu */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -87,8 +87,8 @@ export const ResultModal: React.FC<ResultModalProps> = ({
           <div
             className={`inline-flex items-center gap-1.5 text-[11px] font-mono font-black uppercase tracking-wider px-3 py-1 rounded-full border mb-2.5 shadow-2xs ${
               isWon
-                ? "bg-emerald-100 text-emerald-950 border-emerald-300"
-                : "bg-slate-100 text-slate-700 border-slate-300"
+                ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700/60"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
             }`}
           >
             <span>{difficulty} MODU</span>
@@ -96,10 +96,10 @@ export const ResultModal: React.FC<ResultModalProps> = ({
             <span>{isWon ? "✓ DOĞRU TAHMİN" : "HAKLAR BİTTİ"}</span>
           </div>
 
-          <h2 className="text-2xl font-black tracking-tight text-slate-950 drop-shadow-xs">
+          <h2 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white drop-shadow-xs">
             {isWon ? "Tebrikler, Bildin!" : "Şansına Küstün!"}
           </h2>
-          <p className="text-xs text-slate-600 font-medium mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
             {isWon
               ? `${attemptsUsed}. tahminde süperstarı buldun.`
               : "Gizemli futbolcunun kimliği:"}
@@ -107,7 +107,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
         </div>
 
         {/* Futbolcu Kartı & Görseli */}
-        <div className="bg-slate-50/90 border border-slate-200/90 rounded-2xl p-4 mb-4 text-left shadow-2xs">
+        <div className="bg-slate-50/90 dark:bg-slate-950/50 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 mb-4 text-left shadow-2xs">
           <div className="flex items-center gap-3.5">
             <PlayerAvatar
               player={player}
@@ -116,20 +116,20 @@ export const ResultModal: React.FC<ResultModalProps> = ({
               className="shadow-md ring-2 ring-emerald-500/30"
             />
             <div className="min-w-0 flex-1">
-              <h3 className="text-base sm:text-lg font-black text-slate-950 truncate">
+              <h3 className="text-base sm:text-lg font-black text-slate-950 dark:text-white truncate">
                 {player.name}
               </h3>
-              <p className="text-xs text-slate-500 truncate mt-0.5 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
                 {player.position} • {player.nationality} {player.flag}
               </p>
-              <div className="text-[11px] font-mono font-bold text-emerald-700 mt-1 truncate">
+              <div className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 mt-1 truncate">
                 Kulüp: {player.currentStatus}
               </div>
             </div>
           </div>
 
           {player.hint && (
-            <div className="text-xs text-amber-900 mt-3 pt-3 border-t border-slate-200/80 leading-relaxed font-medium bg-amber-50/80 p-2.5 rounded-xl border border-amber-200 shadow-2xs">
+            <div className="text-xs text-amber-900 dark:text-amber-200 mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-800 leading-relaxed font-medium bg-amber-50/80 dark:bg-amber-950/50 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/70 shadow-2xs">
               💡 {player.hint}
             </div>
           )}
@@ -137,23 +137,23 @@ export const ResultModal: React.FC<ResultModalProps> = ({
 
         {/* Skor & İstatistik Satırı */}
         <div className="grid grid-cols-3 gap-2 mb-5">
-          <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 shadow-2xs">
-            <div className="text-[10px] text-slate-500 uppercase font-mono font-bold">Tahmin</div>
-            <div className="text-sm font-black text-slate-950 mt-0.5 font-mono">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-2.5 shadow-2xs">
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-mono font-bold">Tahmin</div>
+            <div className="text-sm font-black text-slate-950 dark:text-white mt-0.5 font-mono">
               {attemptsUsed} / {maxAttempts}
             </div>
           </div>
 
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-2xs">
-            <div className="text-[10px] text-emerald-800 uppercase font-mono font-bold">Puan</div>
-            <div className="text-sm font-black text-emerald-700 mt-0.5 font-mono">
+          <div className="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/70 rounded-xl p-2.5 shadow-2xs">
+            <div className="text-[10px] text-emerald-800 dark:text-emerald-300 uppercase font-mono font-bold">Puan</div>
+            <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-0.5 font-mono">
               +{scoreEarned}
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-2xs">
-            <div className="text-[10px] text-amber-800 uppercase font-mono font-bold">Seri</div>
-            <div className="text-sm font-black text-amber-600 mt-0.5 font-mono flex items-center justify-center gap-1">
+          <div className="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 rounded-xl p-2.5 shadow-2xs">
+            <div className="text-[10px] text-amber-800 dark:text-amber-300 uppercase font-mono font-bold">Seri</div>
+            <div className="text-sm font-black text-amber-600 dark:text-amber-400 mt-0.5 font-mono flex items-center justify-center gap-1">
               <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               <span>{streak}</span>
             </div>
@@ -173,16 +173,16 @@ export const ResultModal: React.FC<ResultModalProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleShare}
-              className="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 hover:text-slate-950 font-bold text-xs rounded-xl border border-slate-300 flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 shadow-2xs"
+              className="w-full py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-bold text-xs rounded-xl border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 shadow-2xs"
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                  <span className="text-emerald-700 font-bold">Kopyalandı!</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">Kopyalandı!</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="w-3.5 h-3.5 text-slate-600" />
+                  <Share2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                   <span>Paylaş</span>
                 </>
               )}
@@ -191,7 +191,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
             {onGoMenu && (
               <button
                 onClick={onGoMenu}
-                className="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 hover:text-slate-950 font-bold text-xs rounded-xl border border-slate-300 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 shadow-2xs"
+                className="w-full py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-bold text-xs rounded-xl border border-slate-300 dark:border-slate-700 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 shadow-2xs"
               >
                 Menüye Dön
               </button>

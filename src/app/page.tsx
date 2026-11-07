@@ -33,6 +33,8 @@ import {
   ArrowRight,
   Sparkles,
   Skull,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 export default function FootballerGuessPage() {
@@ -48,6 +50,44 @@ export default function FootballerGuessPage() {
   );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  // 🌟 Tema Yükleme ve Değiştirme
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("football_guess_theme") as "light" | "dark" | null;
+      if (savedTheme === "dark" || savedTheme === "light") {
+        setTheme(savedTheme);
+        if (savedTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (prefersDark) {
+          setTheme("dark");
+          document.documentElement.classList.add("dark");
+        }
+      }
+    } catch {}
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    soundManager.playClick();
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("football_guess_theme", next);
+      } catch {}
+      if (next === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      return next;
+    });
+  }, []);
 
   // 🌟 Günün Futbolcusu Modal Durumları
   const [isDailyResultModalOpen, setIsDailyResultModalOpen] = useState<boolean>(false);
@@ -385,6 +425,8 @@ export default function FootballerGuessPage() {
           stats={stats}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
+          theme={theme}
+          onToggleTheme={toggleTheme}
           totalPlayersCount={PLAYERS.length}
         />
         {dailyModalData && (
@@ -416,6 +458,8 @@ export default function FootballerGuessPage() {
         onPlayRegularGame={() => handleStartGame(difficulty, category)}
         soundEnabled={soundEnabled}
         onToggleSound={toggleSound}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
     );
   }
@@ -423,27 +467,27 @@ export default function FootballerGuessPage() {
   // 2. OYUN GÖRÜNÜMÜ
   if (!targetPlayer) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center text-slate-500 font-mono text-xs">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 flex items-center justify-center text-slate-500 font-mono text-xs">
         yükleniyor...
       </div>
     );
   }
 
   return (
-    <main className="relative min-h-screen text-slate-800 font-sans overflow-x-hidden pb-12">
+    <main className="relative min-h-screen text-slate-800 dark:text-slate-100 font-sans overflow-x-hidden pb-12">
       {/* Gerçek Renkleriyle Futbol Sahası (Fixed Arka Plan) */}
       <FootballPitchBackground />
 
       {/* Canlı Stadyum TV Header */}
-      <header className="relative z-10 border-b border-slate-200/90 bg-white/95 backdrop-blur-xl sticky top-0 shadow-xs text-slate-800">
+      <header className="relative z-10 border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl sticky top-0 shadow-xs text-slate-800 dark:text-slate-100">
         <div className="max-w-3xl mx-auto px-4 h-15 flex items-center justify-between">
           {/* Menüye Dön Butonu & Logo */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setView("MENU")}
-              className="flex items-center gap-1.5 text-xs text-slate-900 hover:text-black py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold shadow-2xs"
+              className="flex items-center gap-1.5 text-xs text-slate-900 dark:text-slate-100 hover:text-black dark:hover:text-white py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold shadow-2xs"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-emerald-700 stroke-[2.5]" />
+              <ArrowLeft className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
               <span>Menü</span>
             </button>
             <GameLogo size="sm" showText={true} />
@@ -451,23 +495,36 @@ export default function FootballerGuessPage() {
 
           <div className="flex items-center gap-2 text-xs">
             {/* Puan & Seri */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-mono text-[11px] shadow-2xs">
-              <span className="font-extrabold text-slate-950">{stats.totalScore} p</span>
-              <span className="text-slate-300">•</span>
-              <div className="flex items-center gap-1 text-amber-600 font-black">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-[11px] shadow-2xs">
+              <span className="font-extrabold text-slate-950 dark:text-white">{stats.totalScore} p</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-black">
                 <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                 <span>{stats.streak}</span>
               </div>
             </div>
 
+            {/* Tema Değiştir (Karanlık / Aydınlık Mod) */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-800 dark:text-slate-200 hover:text-black dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
+              title={theme === "dark" ? "Aydınlık Moda Geç" : "Karanlık Moda Geç"}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-700" />
+              )}
+            </button>
+
             {/* Mute Toggle */}
             <button
               onClick={toggleSound}
-              className="p-2 text-slate-800 hover:text-black rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all cursor-pointer shadow-2xs"
+              className="p-2 text-slate-800 dark:text-slate-200 hover:text-black dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
               title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
             >
               {soundEnabled ? (
-                <Volume2 className="w-4 h-4 text-emerald-700" />
+                <Volume2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               ) : (
                 <VolumeX className="w-4 h-4 text-slate-500" />
               )}
@@ -481,9 +538,9 @@ export default function FootballerGuessPage() {
         {/* ======================================================== */}
         {/* 🏟️ ANA STADYUM KONSOLU (Buzlu Cam & Canlı TV Stili)      */}
         {/* ======================================================== */}
-        <section className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-xl shadow-slate-950/10 space-y-4">
+        <section className="relative z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl shadow-slate-950/10 space-y-4">
           {/* 1. ÜST SCOREBOARD / FUTBOLCU & HAK GÖSTERGESİ */}
-          <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
+          <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3.5 min-w-0">
               {/* Futbolcu Avatarı: Oyun sürerken gizemli soru işareti, bitince gerçek fotoğraf */}
               <PlayerAvatar
@@ -508,7 +565,7 @@ export default function FootballerGuessPage() {
                   >
                     {difficulty}
                   </span>
-                  <span className="text-[11px] font-mono text-slate-500 font-bold truncate">
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-bold truncate">
                     {category === "SUPER_LIG"
                       ? "Süper Lig"
                       : category === "WORLD"
@@ -517,11 +574,11 @@ export default function FootballerGuessPage() {
                   </span>
                 </div>
 
-                <h2 className="text-base sm:text-xl font-black text-slate-950 tracking-tight truncate mt-0.5">
+                <h2 className="text-base sm:text-xl font-black text-slate-950 dark:text-white tracking-tight truncate mt-0.5">
                   {gameState === "PLAYING" ? "Gizemli Futbolcu" : targetPlayer.name}
                 </h2>
 
-                <p className="text-xs text-slate-600 font-medium truncate">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium truncate">
                   {gameState === "PLAYING"
                     ? isLastChance
                       ? "🔥 Son tahmin hakkınız!"
@@ -535,14 +592,14 @@ export default function FootballerGuessPage() {
 
             <div className="flex flex-col items-end gap-2 shrink-0">
               {/* Hak Göstergesi */}
-              <div className="flex items-center gap-1 bg-slate-100/90 px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
-                <span className="text-[10px] font-mono font-bold text-slate-600 mr-1 hidden sm:inline">
+              <div className="flex items-center gap-1 bg-slate-100/90 dark:bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 mr-1 hidden sm:inline">
                   Hak:
                 </span>
                 {isLastChance ? (
                   <div className="flex items-center gap-1 px-0.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shadow-2xs" />
-                    <span className="text-[10px] font-mono font-black text-amber-700 tracking-wider">
+                    <span className="text-[10px] font-mono font-black text-amber-700 dark:text-amber-400 tracking-wider">
                       SON HAK
                     </span>
                   </div>
@@ -553,7 +610,7 @@ export default function FootballerGuessPage() {
                       className={`h-2.5 rounded-full transition-all duration-200 ${
                         i < remainingAttempts
                           ? "w-3 bg-emerald-500 shadow-2xs"
-                          : "w-1.5 bg-slate-300"
+                          : "w-1.5 bg-slate-300 dark:bg-slate-700"
                       }`}
                       title={`${i + 1}. Hak`}
                     />
@@ -563,10 +620,10 @@ export default function FootballerGuessPage() {
 
               <button
                 onClick={() => pickNewPlayer(playedIds, difficulty, category)}
-                className="flex items-center gap-1 text-[11px] font-bold text-slate-700 hover:text-slate-950 py-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer shadow-2xs"
+                className="flex items-center gap-1 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer shadow-2xs"
                 title="Farklı bir gizemli futbolcuya geç"
               >
-                <RotateCcw className="w-3 h-3 text-emerald-600" />
+                <RotateCcw className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 <span>Yeni Futbolcu</span>
               </button>
             </div>
@@ -584,8 +641,8 @@ export default function FootballerGuessPage() {
           {/* ⚡ JOKER KONSOLU (CAN SİMİTLERİ) */}
           {gameState === "PLAYING" && (
             difficulty === "EFSANE" ? (
-              <div className="w-full bg-purple-50/80 border border-purple-200/90 rounded-2xl p-2.5 text-center text-xs font-mono font-bold text-purple-950 flex items-center justify-center gap-2 shadow-2xs">
-                <Skull className="w-4 h-4 text-purple-600" />
+              <div className="w-full bg-purple-50/80 dark:bg-purple-950/50 border border-purple-200/90 dark:border-purple-800/70 rounded-2xl p-2.5 text-center text-xs font-mono font-bold text-purple-950 dark:text-purple-200 flex items-center justify-center gap-2 shadow-2xs">
+                <Skull className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 <span>Efsane Mod: Bu seviyede taktiksel jokerler ve ipuçları kapalıdır!</span>
               </div>
             ) : (

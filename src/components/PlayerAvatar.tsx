@@ -111,7 +111,7 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
 
   return (
     <div className={`relative shrink-0 ${currentSize.box} ${className}`}>
-      <div className="w-full h-full rounded-[inherit] overflow-hidden border border-slate-200/90 shadow-xs bg-slate-100 flex items-center justify-center">
+      <div className="w-full h-full rounded-[inherit] overflow-hidden border border-slate-200/90 dark:border-slate-700 shadow-xs bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
         {hasValidImage ? (
           <img
             src={imageUrl}

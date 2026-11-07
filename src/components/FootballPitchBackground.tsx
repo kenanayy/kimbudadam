@@ -6,20 +6,25 @@ export const FootballPitchBackground: React.FC = React.memo(() => {
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none select-none z-0">
       {/* 1. Canlı Stadyum Çimi ve Doğal Biçim Şeritleri */}
-      <div className="absolute inset-0 bg-[#14532d] flex flex-col justify-between">
+      <div className="absolute inset-0 bg-[#14532d] dark:bg-[#071f12] flex flex-col justify-between transition-colors duration-500">
         {/* 12 Adet Avrupa Maçı Çim Şeridi */}
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className={`flex-1 w-full ${
-              i % 2 === 0 ? "bg-[#166534]" : "bg-[#14532d]"
+            className={`flex-1 w-full transition-colors duration-500 ${
+              i % 2 === 0
+                ? "bg-[#166534] dark:bg-[#0a2c1a]"
+                : "bg-[#14532d] dark:bg-[#071f12]"
             }`}
           />
         ))}
       </div>
 
       {/* 2. Doğal Stadyum Kenar Gölgelendirmesi (Vignette) */}
-      <div className="absolute inset-0 bg-radial from-transparent via-black/15 to-black/45" />
+      <div className="absolute inset-0 bg-radial from-transparent via-black/15 to-black/45 dark:via-black/35 dark:to-black/75 transition-opacity duration-500" />
+
+      {/* Karanlık Mod Gece Stadyumu Işık & Atmosfer Katmanı */}
+      <div className="absolute inset-0 bg-slate-950/40 pointer-events-none hidden dark:block transition-all duration-500" />
 
       {/* 3. Vektörel Futbol Sahası Çizgileri - Net Beyaz */}
       <svg
