@@ -456,16 +456,16 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
             {/* SEN (Sol Taraf) */}
             <div className="flex items-center gap-2 min-w-0">
               <div className="text-right min-w-0">
-                <span className="text-[10px] font-mono text-emerald-600 font-bold block leading-none">
-                  (Sen)
+                <span className="text-[9px] font-mono font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 inline-block leading-none">
+                  Sen
                 </span>
-                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
+                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block mt-0.5">
                   {me?.name || "Sen"}
                 </span>
                 {me?.lastGuess && (
                   <span
                     className={`text-[10px] font-mono font-bold block truncate max-w-[90px] sm:max-w-[130px] ${
-                      me.isCorrect ? "text-emerald-600 font-extrabold" : "text-rose-500"
+                      me.isCorrect ? "text-emerald-600 font-extrabold" : "text-rose-500 font-medium"
                     }`}
                     title={me.lastGuess}
                   >
@@ -473,17 +473,21 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
                   </span>
                 )}
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-mono font-black text-lg sm:text-xl flex items-center justify-center shadow-md shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-mono font-black text-lg sm:text-xl flex items-center justify-center shadow-md ring-2 ring-emerald-500/20 shrink-0">
                 {me?.score || 0}
               </div>
             </div>
 
             {/* ORTA: VS • SÜRE • TUR */}
             <div className="flex flex-col items-center shrink-0">
-              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 font-mono text-[10px] font-black text-slate-700">
+              <div className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border font-mono text-[10px] font-black transition-colors ${
+                timeLeft <= 10
+                  ? "bg-rose-50 border-rose-300 text-rose-700 animate-pulse"
+                  : "bg-slate-100 border-slate-200/80 text-slate-700"
+              }`}>
                 <span>TUR {room.currentRoundIndex + 1}/{room.roundsCount}</span>
                 <span>•</span>
-                <span className={timeLeft <= 10 ? "text-rose-600 animate-pulse font-extrabold" : "text-emerald-700 font-extrabold"}>
+                <span className={timeLeft <= 10 ? "text-rose-600 font-black" : "text-emerald-700 font-extrabold"}>
                   ⏱️ {timeLeft}s
                 </span>
               </div>
@@ -494,20 +498,20 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
 
             {/* RAKİP (Sağ Taraf) */}
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-mono font-black text-lg sm:text-xl flex items-center justify-center shadow-md shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-mono font-black text-lg sm:text-xl flex items-center justify-center shadow-md ring-2 ring-indigo-500/20 shrink-0">
                 {opponent?.score || 0}
               </div>
               <div className="text-left min-w-0">
-                <span className="text-[10px] font-mono text-indigo-600 font-bold block leading-none">
-                  (Rakip)
+                <span className="text-[9px] font-mono font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200/80 inline-block leading-none">
+                  Rakip
                 </span>
-                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
+                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block mt-0.5">
                   {opponent?.name || "Rakip Bekleniyor"}
                 </span>
                 {opponent?.lastGuess && (
                   <span
                     className={`text-[10px] font-mono font-bold block truncate max-w-[90px] sm:max-w-[130px] ${
-                      opponent.isCorrect ? "text-emerald-600 font-extrabold" : "text-rose-500 font-extrabold"
+                      opponent.isCorrect ? "text-emerald-600 font-extrabold" : "text-rose-500 font-medium"
                     }`}
                     title={opponent.lastGuess}
                   >
@@ -533,28 +537,41 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
           </button>
         </div>
 
-        {/* Canlı TV Kayan Altyazı Bandı */}
-        {room.actionNotice && (
-          <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-mono font-bold flex items-center gap-2 shadow-inner overflow-hidden">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-            <span className="truncate text-slate-200">
-              {room.actionNotice}
-            </span>
-          </div>
-        )}
-
-        {/* Canlı Rakip Yanlış Tahmin Alarmı (Mind Games Flash) */}
-        {opponentGuessFlash && (
-          <div className="mt-2.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 text-white text-xs font-mono font-bold flex items-center justify-between gap-2 shadow-lg shadow-rose-900/25 animate-in slide-in-from-top-2 duration-200">
+        {/* Canlı TV Durum ve Akıl Oyunları Bandı (Tek ve Uyumlu Tasarım) */}
+        {(opponentGuessFlash || room.actionNotice) && (
+          <div
+            className={`mt-2.5 px-3.5 py-2 rounded-2xl text-xs font-mono font-bold flex items-center justify-between gap-2 shadow-xs transition-all animate-in fade-in duration-200 ${
+              opponentGuessFlash
+                ? "bg-slate-900 text-white border border-amber-500/30 ring-1 ring-amber-500/20"
+                : "bg-slate-900 text-slate-200 border border-slate-800"
+            }`}
+          >
             <div className="flex items-center gap-2 truncate min-w-0">
-              <span className="text-base animate-bounce">👀</span>
-              <span className="truncate">
-                AKIL OYUNLARI: <span className="underline decoration-white/60">{opponentGuessFlash}</span>
-              </span>
+              {opponentGuessFlash ? (
+                <>
+                  <span className="text-[10px] font-sans font-black bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1">
+                    <span>⚡</span>
+                    <span>Rakip Tahmini</span>
+                  </span>
+                  <span className="truncate text-slate-100 font-semibold">
+                    {opponentGuessFlash}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="truncate text-slate-200">
+                    {room.actionNotice}
+                  </span>
+                </>
+              )}
             </div>
-            <span className="text-[10px] font-sans font-black bg-white text-rose-800 px-2 py-0.5 rounded-full uppercase shrink-0 shadow-xs">
-              Fırsat Sende! 🔥
-            </span>
+
+            {opponentGuessFlash && (
+              <span className="text-[10px] font-sans font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full shrink-0 animate-pulse">
+                Fırsat Sende 🎯
+              </span>
+            )}
           </div>
         )}
       </header>
@@ -574,7 +591,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
             />
             <div>
               <span className="text-[10px] font-mono font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
-                1v1 CANLI MAÇ
+                1v1 CANLI DERBİ
               </span>
               <h2 className="text-base sm:text-lg font-black text-slate-950 truncate mt-0.5">
                 {room.status === "PLAYING" || !revealedPlayer
@@ -588,11 +605,12 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
           </div>
 
           <div className="text-right">
-            <span className="text-xs font-mono font-bold text-slate-400 block">
-              Kariyer Rotası
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
+              Maç Modu
             </span>
-            <span className="text-xs sm:text-sm font-black font-mono text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-lg border border-emerald-300">
-              Tamamı Açık ({currentCareer.length} Kulüp)
+            <span className="text-xs font-black font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200/80 inline-flex items-center gap-1 shadow-2xs">
+              <span>⚡</span>
+              <span>Hızlı Tahmin</span>
             </span>
           </div>
         </div>
@@ -819,10 +837,10 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
         <div className="pt-2 border-t border-slate-100 flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-slate-400">
             <Sparkles className="w-3 h-3 text-amber-500" />
-            <span>Canlı Emoji Fırlat (Goygoy & Reaksiyon):</span>
+            <span>Canlı Reaksiyon & Emoji Fırlat:</span>
           </div>
 
-          <div className="flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-slate-800 shadow-xl max-w-full overflow-x-auto no-scrollbar">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200/90 shadow-2xs max-w-full overflow-x-auto no-scrollbar">
             {[
               { emoji: "😂", label: "Kahkaha" },
               { emoji: "🤫", label: "Sus" },
@@ -838,7 +856,7 @@ export const MultiplayerMatch: React.FC<MultiplayerMatchProps> = ({
                 type="button"
                 onClick={() => handleSendReaction(emoji)}
                 disabled={reactionCooldown}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl hover:bg-white/20 active:scale-135 transition-all flex items-center justify-center text-lg sm:text-xl cursor-pointer hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 select-none shadow-2xs"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl hover:bg-white active:scale-130 transition-all flex items-center justify-center text-lg sm:text-xl cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 select-none shadow-2xs hover:shadow-xs border border-transparent hover:border-slate-200/80"
                 title={label}
               >
                 {emoji}
