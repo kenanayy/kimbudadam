@@ -245,12 +245,12 @@ export const GameLogo: React.FC<GameLogoProps> = React.memo(({
       {/* İsim Tipografisi (Header ve Yan Metin) */}
       {showText && (
         <div className="flex flex-col select-none">
-          <div className={`font-black tracking-tight text-slate-950 leading-none ${textSize} flex items-center gap-0.5`}>
+          <div className={`font-black tracking-tight text-slate-950 dark:text-white leading-none ${textSize} flex items-center gap-0.5`}>
             <span>KİM BU ADAM</span>
-            <span className="text-emerald-600 font-black">?</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-black">?</span>
           </div>
-          <div className="text-[9.5px] sm:text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold mt-1 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+          <div className="text-[9.5px] sm:text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mt-1 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 inline-block" />
             <span>Kariyer & Transfer Bulmaca</span>
           </div>
         </div>
