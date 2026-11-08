@@ -32,33 +32,33 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   const sizeMap = {
     xs: {
       box: "w-6 h-6 rounded-lg",
-      text: "text-[9px]",
-      flag: "text-[10px] -bottom-1 -right-1",
+      text: "text-[10px]",
+      badge: "w-3.5 h-3.5 text-[8px] -bottom-0.5 -right-0.5",
       icon: "w-3 h-3",
     },
     sm: {
       box: "w-8 h-8 rounded-xl",
-      text: "text-[11px]",
-      flag: "text-xs -bottom-1 -right-1",
+      text: "text-xs",
+      badge: "w-4 h-4 text-[9px] -bottom-0.5 -right-0.5",
       icon: "w-4 h-4",
     },
     md: {
       box: "w-11 h-11 rounded-2xl",
-      text: "text-sm",
-      flag: "text-sm -bottom-1 -right-1",
+      text: "text-base",
+      badge: "w-4.5 h-4.5 text-[10px] -bottom-1 -right-1",
       icon: "w-5 h-5",
     },
     lg: {
       box: "w-16 h-16 rounded-3xl",
-      text: "text-lg",
-      flag: "text-base -bottom-1.5 -right-1.5",
-      icon: "w-8 h-8",
+      text: "text-2xl",
+      badge: "w-6 h-6 text-xs -bottom-1 -right-1",
+      icon: "w-7 h-7",
     },
     xl: {
       box: "w-24 h-24 sm:w-28 sm:h-28 rounded-3xl",
-      text: "text-2xl",
-      flag: "text-xl -bottom-2 -right-2",
-      icon: "w-12 h-12",
+      text: "text-4xl",
+      badge: "w-8 h-8 text-sm -bottom-1.5 -right-1.5",
+      icon: "w-10 h-10",
     },
   };
 
@@ -68,21 +68,38 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   if (isMystery || !player) {
     return (
       <div className={`relative shrink-0 ${currentSize.box} ${className}`}>
-        <div className="w-full h-full rounded-[inherit] bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 border-2 border-emerald-500/40 shadow-lg flex items-center justify-center text-emerald-400 overflow-hidden group select-none">
-          {/* Arka plan ışıması */}
-          <div className="absolute inset-0 bg-emerald-500/10 animate-pulse pointer-events-none" />
+        {/* Ana Kart Gövdesi - Tam yuvarlatılmış ve kırpılmış */}
+        <div className="w-full h-full rounded-[inherit] bg-gradient-to-br from-emerald-950/70 via-slate-900 to-slate-950 border-2 border-emerald-400/80 dark:border-emerald-500/70 shadow-md flex items-center justify-center text-emerald-400 overflow-hidden group select-none relative">
+          {/* Radyal Stadyum Işık Hüzmesi */}
+          <div className="absolute inset-0 bg-radial from-emerald-500/25 via-emerald-500/5 to-transparent pointer-events-none animate-pulse" />
 
+          {/* Arka Planda Hafif Futbolcu Silueti */}
+          <User className="absolute inset-0 m-auto w-3/4 h-3/4 text-emerald-400/20 pointer-events-none stroke-[1.5]" />
+
+          {/* Soru İşareti */}
           <div className="relative z-10 flex flex-col items-center justify-center">
-            <span className={`font-mono font-black ${currentSize.text} tracking-tight drop-shadow-md`}>
+            <span className={`font-mono font-black ${currentSize.text} tracking-tight drop-shadow-md bg-gradient-to-b from-white via-emerald-200 to-emerald-400 bg-clip-text text-transparent`}>
               ?
             </span>
           </div>
         </div>
 
+        {/* Sağ Alt Köşe: Vektörel Mini Futbol Topu Rozeti (Şeffaf alan taşmasını önler) */}
         {showFlag && (
-          <span className={`absolute ${currentSize.flag} z-10 select-none drop-shadow-sm`}>
-            ⚽
-          </span>
+          <div
+            className={`absolute ${currentSize.badge} z-10 rounded-full bg-slate-950 border-1.5 border-emerald-400 shadow-md flex items-center justify-center text-emerald-300 select-none`}
+            title="Gizemli Futbolcu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3/4 h-3/4 text-emerald-400">
+              <circle cx="12" cy="12" r="9" />
+              <polygon points="12,7 15,9.5 14,13.5 10,13.5 9,9.5" fill="currentColor" opacity="0.8" />
+              <line x1="12" y1="7" x2="12" y2="3" />
+              <line x1="15" y1="9.5" x2="19" y2="8" />
+              <line x1="14" y1="13.5" x2="17" y2="17" />
+              <line x1="10" y1="13.5" x2="7" y2="17" />
+              <line x1="9" y1="9.5" x2="5" y2="8" />
+            </svg>
+          </div>
         )}
       </div>
     );
@@ -134,12 +151,12 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
       </div>
 
       {showFlag && player.flag && (
-        <span
-          className={`absolute ${currentSize.flag} z-10 select-none drop-shadow-xs leading-none`}
+        <div
+          className={`absolute ${currentSize.badge} z-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center justify-center leading-none select-none overflow-hidden`}
           title={player.nationality}
         >
-          {player.flag}
-        </span>
+          <span>{player.flag}</span>
+        </div>
       )}
     </div>
   );

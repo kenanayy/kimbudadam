@@ -407,7 +407,6 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
                   player={targetPlayer}
                   size="md"
                   isMystery={gameState === "PLAYING"}
-                  className="shadow-md"
                 />
               </div>
               <div className="shrink-0 hidden sm:block">
@@ -415,7 +414,6 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
                   player={targetPlayer}
                   size="lg"
                   isMystery={gameState === "PLAYING"}
-                  className="shadow-md"
                 />
               </div>
 
