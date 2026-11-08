@@ -9515,8 +9515,8 @@ export const PLAYERS: Player[] = [
     flag: "🇫🇷",
     position: "Orta Saha",
     birthYear: 1999,
-    currentStatus: "Lazio",
-    hint: "Lorient, Arsenal, Hertha ve Marsilya sonrası Lazio orta sahasında kabarık saçları ve hırçın mücadeleci tarzıyla parlayan Fransız.",
+    currentStatus: "Fenerbahçe",
+    hint: "Lorient, Arsenal, Hertha, Marsilya ve Lazio sonrası Fenerbahçe orta sahasına katılan, kabarık saçları ve hırçın mücadeleci tarzıyla tanınan Fransız yıldız.",
     career: [
       { years: "2016 - 2018", club: "Lorient", league: "Fransa" },
       { years: "2018 - 2022", club: "Arsenal", league: "İngiltere" },
@@ -9524,7 +9524,8 @@ export const PLAYERS: Player[] = [
       { years: "2021 - 2022", club: "Marseille", league: "Fransa", isLoan: true },
       { years: "2022 - 2023", club: "Marseille", league: "Fransa" },
       { years: "2023 - 2024", club: "Lazio", league: "İtalya", isLoan: true },
-      { years: "2024 - Günümüz", club: "Lazio", league: "İtalya" },
+      { years: "2024 - 2026", club: "Lazio", league: "İtalya" },
+      { years: "2026 - Günümüz", club: "Fenerbahçe", league: "Türkiye" },
     ],
   },
   {
