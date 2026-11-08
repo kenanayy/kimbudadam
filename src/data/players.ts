@@ -12873,11 +12873,13 @@ export const PLAYERS: Player[] = [
     flag: "🇩🇰",
     position: "Defans",
     birthYear: 2003,
-    currentStatus: "Galatasaray",
-    hint: "Kopenhag ile Şampiyonlar Ligi'nde dikkat çekip yüksek bonservisle Galatasaray'a transfer olan genç Danimarkalı bek.",
+    currentStatus: "Le Havre (Kiralık)",
+    hint: "Kopenhag altyapısından çıkıp Galatasaray'a transfer olan, Southampton ve Le Havre'da kiralık forma giyen Danimarkalı sağ bek.",
     career: [
       { years: "2021 - 2024", club: "Kopenhag", league: "Danimarka" },
-      { years: "2024 - Günümüz", club: "Galatasaray", league: "Türkiye" },
+      { years: "2024 - 2025", club: "Galatasaray", league: "Türkiye" },
+      { years: "2025 - 2026", club: "Southampton", league: "İngiltere", isLoan: true },
+      { years: "2026 - Günümüz", club: "Le Havre", league: "Fransa", isLoan: true },
     ],
   },
   {
