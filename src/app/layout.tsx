@@ -23,10 +23,12 @@ export const metadata: Metadata = {
   applicationName: "Kim Bu Adam?",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg?v=5", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png?v=5", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png?v=5", type: "image/png", sizes: "16x16" },
+      { url: "/favicon.ico?v=5", sizes: "any" },
     ],
-    apple: "/logo.png",
+    apple: "/logo.png?v=5",
   },
   openGraph: {
     title: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",

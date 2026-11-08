@@ -43,15 +43,15 @@ export const GameLogo: React.FC<GameLogoProps> = React.memo(({
             {/* 1. Stadyum Çimi ve Zümrüt Radyal Degrade */}
             <radialGradient
               id="squircleBg"
-              cx="25%"
-              cy="20%"
-              r="90%"
+              cx="30%"
+              cy="25%"
+              r="85%"
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="35%" stopColor="#059669" />
-              <stop offset="75%" stopColor="#064e3b" />
-              <stop offset="100%" stopColor="#022c22" />
+              <stop offset="0%" stopColor="#34d399" />
+              <stop offset="35%" stopColor="#10b981" />
+              <stop offset="70%" stopColor="#059669" />
+              <stop offset="100%" stopColor="#047857" />
             </radialGradient>
 
             {/* 2. Dış Çerçeve Degradesi (Altın & Zümrüt Işıltısı) */}
@@ -63,22 +63,24 @@ export const GameLogo: React.FC<GameLogoProps> = React.memo(({
               y2="120"
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="0%" stopColor="#a7f3d0" />
-              <stop offset="50%" stopColor="#ffffff" />
-              <stop offset="100%" stopColor="#047857" />
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="40%" stopColor="#fef08a" />
+              <stop offset="80%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#10b981" />
             </linearGradient>
 
             {/* 3. "ADAM" Kelimesi İçin Canlı Altın Degrade */}
             <linearGradient id="goldAdam" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="35%" stopColor="#fef08a" />
+              <stop offset="40%" stopColor="#fef08a" />
               <stop offset="100%" stopColor="#f59e0b" />
             </linearGradient>
 
             {/* 4. Soru İşareti İçin Neon Parıltı Degradesi */}
             <linearGradient id="neonQuestion" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#a7f3d0" />
-              <stop offset="100%" stopColor="#34d399" />
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="60%" stopColor="#6ee7b7" />
+              <stop offset="100%" stopColor="#10b981" />
             </linearGradient>
 
             {/* 5. Üst Cam Parlama Degradesi */}
