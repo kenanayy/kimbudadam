@@ -21,7 +21,8 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   showFlag = true,
 }) => {
   const [imgError, setImgError] = useState(false);
-  const imageUrl = player ? (getPlayerImageUrl(player.id) || player.image) : undefined;
+  const rawImageUrl = player ? (getPlayerImageUrl(player.id) || player.image) : undefined;
+  const imageUrl = rawImageUrl?.startsWith("/") ? `.${rawImageUrl}` : rawImageUrl;
 
   // Oyuncu veya görsel değiştiğinde hata durumunu sıfırla
   useEffect(() => {

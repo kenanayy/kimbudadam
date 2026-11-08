@@ -20,10 +20,14 @@ export const ClubLogo: React.FC<ClubLogoProps> = ({
   const [imgError, setImgError] = useState(false);
   const badge = getClubBadge(clubName);
 
+  // Normalize logoUrl to relative path (./logos/...) for subpath/itch.io hosting environments
+  const rawLogoUrl = badge.logoUrl;
+  const logoUrl = rawLogoUrl?.startsWith("/") ? `.${rawLogoUrl}` : rawLogoUrl;
+
   // Kulüp veya logo URL'i değiştiğinde hata durumunu sıfırla
   useEffect(() => {
     setImgError(false);
-  }, [clubName, badge.logoUrl]);
+  }, [clubName, logoUrl]);
 
   // Boyut eşleşmeleri
   const sizeClasses = {
@@ -44,7 +48,7 @@ export const ClubLogo: React.FC<ClubLogoProps> = ({
     "2xl": 68,
   };
 
-  const hasLogoUrl = Boolean(badge.logoUrl && !imgError);
+  const hasLogoUrl = Boolean(logoUrl && !imgError);
 
   return (
     <div
@@ -62,7 +66,7 @@ export const ClubLogo: React.FC<ClubLogoProps> = ({
       {hasLogoUrl ? (
         // Resmi Logo Görseli (Vektörel / PNG)
         <img
-          src={badge.logoUrl}
+          src={logoUrl}
           alt={badge.name}
           width={imageSizes[size]}
           height={imageSizes[size]}
