@@ -5,12 +5,14 @@ import React from "react";
 interface GameLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
+  hideTextOnMobile?: boolean;
   className?: string;
 }
 
 export const GameLogo: React.FC<GameLogoProps> = React.memo(({
   size = "md",
   showText = false,
+  hideTextOnMobile = false,
   className = "",
 }) => {
   const dimensions = {
@@ -244,7 +246,7 @@ export const GameLogo: React.FC<GameLogoProps> = React.memo(({
 
       {/* İsim Tipografisi (Header ve Yan Metin) */}
       {showText && (
-        <div className="flex flex-col select-none">
+        <div className={`flex-col select-none ${hideTextOnMobile ? "hidden sm:flex" : "flex"}`}>
           <div className={`font-black tracking-tight text-slate-950 dark:text-white leading-none ${textSize} flex items-center gap-0.5`}>
             <span>KİM BU ADAM</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-black">?</span>

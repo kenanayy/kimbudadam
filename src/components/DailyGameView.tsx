@@ -343,7 +343,7 @@ export const DailyGameView: React.FC<DailyGameViewProps> = ({
               <ArrowLeft className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
               <span>Menü</span>
             </button>
-            <GameLogo size="sm" showText={true} />
+            <GameLogo size="sm" showText={true} hideTextOnMobile={true} />
           </div>
 
           <div className="flex items-center gap-2 text-xs">
