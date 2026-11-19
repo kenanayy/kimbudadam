@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Kim Bu Adam?",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.png?v=2",
         width: 1200,
         height: 630,
         alt: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Kim Bu Adam? - Futbolcu Tahmin Oyunu",
     description: "Transfer ve kariyer geçmişinden futbolcuyu bulma oyunu. Günün futbolcusunu çöz, futbol bilgini test et!",
-    images: ["/og-image.png"],
+    images: ["/og-image.png?v=2"],
   },
 };
 

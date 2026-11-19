@@ -16,25 +16,15 @@
       <stop offset="100%" stop-color="#10b981" />
     </linearGradient>
 
-    <!-- 3. "ADAM" Kelimesi İçin Canlı Altın Degrade (goldAdam & favGold) -->
+    <!-- 3. "ADAM" Kelimesi İçin Canlı Altın Degrade -->
     <linearGradient id="goldAdam" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ffffff" />
       <stop offset="40%" stop-color="#fef08a" />
       <stop offset="100%" stop-color="#f59e0b" />
     </linearGradient>
-    <linearGradient id="favGold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="40%" stop-color="#fef08a" />
-      <stop offset="100%" stop-color="#f59e0b" />
-    </linearGradient>
 
-    <!-- 4. Soru İşareti İçin Neon Parıltı Degradesi (neonQuestion & favNeon) -->
+    <!-- 4. Soru İşareti İçin Neon Parıltı Degradesi -->
     <linearGradient id="neonQuestion" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="60%" stop-color="#6ee7b7" />
-      <stop offset="100%" stop-color="#10b981" />
-    </linearGradient>
-    <linearGradient id="favNeon" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ffffff" />
       <stop offset="60%" stop-color="#6ee7b7" />
       <stop offset="100%" stop-color="#10b981" />
@@ -78,10 +68,10 @@
   <path d="M 6 32 C 6 18, 18 6, 32 6 L 88 6 C 102 6, 114 18, 114 32 L 114 44 C 74 50, 36 42, 6 64 Z" fill="url(#topGloss)" />
 
   <!-- F. "KİM BU" METNİ (Üst Satır) -->
-  <text x="60" y="45" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="18" letter-spacing="2.2" filter="url(#textShadow)">KİM BU</text>
+  <text x="60" y="45" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="18" letter-spacing="2.2" filter="url(#textShadow)">KİM BU</text>
 
-  <!-- G. "ADAM?" METNİ (Ortalanmış Tek Blok) -->
-  <text x="60" y="76" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" filter="url(#textShadow)">
+  <!-- G. "ADAM?" METNİ (Ortalanmış ve Hizalanmış Tek Blok) -->
+  <text x="60" y="76" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" filter="url(#textShadow)">
     <tspan fill="url(#goldAdam)" font-size="24" letter-spacing="1.2">ADAM</tspan>
     <tspan fill="url(#neonQuestion)" font-size="28" dx="4" filter="url(#questionGlow)">?</tspan>
   </text>
@@ -96,7 +86,7 @@
     <polygon points="0,-3 2.8,-1 1.7,2.5 -1.7,2.5 -2.8,-1" fill="#064e3b" />
     <line x1="0" y1="-3" x2="0" y2="-7.5" stroke="#064e3b" stroke-width="1.1" />
     <line x1="2.8" y1="-1" x2="6.8" y2="-2.5" stroke="#064e3b" stroke-width="1.1" />
-    <line x1="1.7" y1="2.5" x2="4.5" y2="6" stroke="#064e3b" strokeWidth="1.1" />
+    <line x1="1.7" y1="2.5" x2="4.5" y2="6" stroke="#064e3b" stroke-width="1.1" />
     <line x1="-1.7" y1="2.5" x2="-4.5" y2="6" stroke="#064e3b" stroke-width="1.1" />
     <line x1="-2.8" y1="-1" x2="-6.8" y2="-2.5" stroke="#064e3b" stroke-width="1.1" />
   </g>
